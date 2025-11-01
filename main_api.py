@@ -15,3 +15,4 @@ async def analyze_clause(file: UploadFile, contract_type: str = "nda"):
         "explanation": explanation,
         "risk_note": risk_note
     }
+
