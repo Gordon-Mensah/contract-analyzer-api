@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 services:
   - type: web
     name: contract-analyzer-api
@@ -5,3 +6,12 @@ services:
     buildCommand: ""
     startCommand: uvicorn main_api:app --host 0.0.0.0 --port 10000
     plan: free
+=======
+services:
+  - type: web
+    name: contract-analyzer-api
+    env: python
+    buildCommand: ""
+    startCommand: uvicorn main_api:app --host 0.0.0.0 --port 10000
+    plan: free
+>>>>>>> 4aaee57cc5d2991792529ccec2efc567e48ceed0
