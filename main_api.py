@@ -17,8 +17,12 @@ app.add_middleware(
 async def analyze_clause(file: UploadFile, contract_type: str = "nda"):
     try:
         contents = await file.read()
+        print(f"File size: {len(contents)} bytes")
+
         with pdfplumber.open(BytesIO(contents)) as pdf:
             text = "\n".join(page.extract_text() or "" for page in pdf.pages)
+
+        print(f"Extracted text: {text[:500]}")  # Show first 500 characters
 
         clause_type, risk = label_clause(text, contract_type)
         explanation = get_clause_explanation(clause_type)
@@ -31,8 +35,5 @@ async def analyze_clause(file: UploadFile, contract_type: str = "nda"):
             "risk_note": risk_note
         }
     except Exception as e:
+        print(f"Error: {str(e)}")
         return {"detail": f"Error processing file: {str(e)}"}
-    print(f"File size: {len(contents)} bytes")
-    print(f"Extracted text: {text[:500]}")
-
-
