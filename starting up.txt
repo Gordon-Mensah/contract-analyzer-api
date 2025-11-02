@@ -1,0 +1,26 @@
+# from your project root (where the venv folder lives)
+.\.venv\Scripts\Activate.ps1 
+
+Command Prompt (cmd.exe):
+
+cmd
+.\.venv\Scripts\activate.bat
+
+2) If you need to create a new venv
+PowerShell or cmd (from project root):
+
+powershell
+python -m venv .venv
+Then activate using the commands above.
+
+4) Install project dependencies
+With venv active:
+
+bash
+pip install -r requirements.txt
+
+5) Run the app from the project root
+Make sure you run Streamlit from the folder containing main.py and the core/ package:
+
+bash
+streamlit run main.py

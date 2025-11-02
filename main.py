@@ -1,0 +1,242 @@
+import streamlit as st
+import requests
+import tempfile
+import io
+import sys, os
+sys.path.append(os.path.dirname(__file__))
+
+import matplotlib.pyplot as plt
+
+from core.config import CACHE_DIR
+from core.state import load_personas, save_session_state, load_session_state
+from core.analysis import (
+    load_contract,
+    chunk_contract,
+    label_clause,
+    explain_clause_risk,
+    get_clause_explanation
+)
+from core.models import get_summarizer, get_embedder
+from core.utils import highlight_risks, format_badges, translate_to_hungarian, mkhash
+from core.ranking import score_candidate_heuristic, predict_accept_prob, log_feedback, embed_text
+from core.negotiation import summarize_clause, add_turn, auto_negotiate_simulation
+from core.export import export_tracked_html, build_docx_with_diffs
+import core.ranking as ranking
+from core.samples import get_sample_contract
+
+st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout="wide")
+
+# ---------- Candidate presentation helper ----------
+def present_top_candidates_ui(original_text, clause_index, persona, style, ranking_mode):
+    st.markdown("### ✨ Suggested Counter-Proposals")
+    summarizer = get_summarizer()
+    candidates = []
+    base_prompt = f"Rewrite the following {st.session_state.contract_type} clause for negotiation. Persona: {persona}. Style: {style}.\n\nClause:\n{original_text}"
+    for i in range(3):
+        prompt = base_prompt + f"\n\nCandidate variation: {i+1}"
+        try:
+            out = summarizer(prompt, max_length=120, min_length=30, do_sample=True, top_k=50, top_p=0.95)
+            text = out[0]["summary_text"].strip() if isinstance(out, list) else out.get("summary_text", "").strip()
+        except Exception:
+            text = original_text[:200] + "..."
+        candidates.append(text)
+
+    scored = []
+    for c in candidates:
+        heur_score, meta = score_candidate_heuristic(original_text, c)
+        meta_ext = meta.copy()
+        meta_ext["original_len"] = len(original_text)
+        meta_ext["candidate_len"] = len(c)
+        prob = predict_accept_prob(meta_ext) if ranking_mode.startswith("Auto") else None
+        rank_score = prob if prob is not None else heur_score
+        scored.append({"text": c, "heur_score": heur_score, "meta": meta_ext, "prob": prob, "rank_score": rank_score})
+    scored = sorted(scored, key=lambda x: x["rank_score"], reverse=True)
+
+    for rank, item in enumerate(scored, start=1):
+        raw_score = item["prob"] if item["prob"] is not None else item["heur_score"]
+        score_100 = int(round(raw_score * 100))
+        score_type = "ML Prediction" if item["prob"] is not None else "Heuristic"
+        st.markdown(f"#### #{rank} — Score: **{score_100}/100** ({score_type})")
+        st.markdown(f"- **Similarity:** {item['meta']['similarity']:.3f}; **Risk Delta:** {item['meta']['risk_delta']:.1f}; **Length Score:** {item['meta']['len_penalty']:.3f}")
+        from core.export import inline_word_diff_html
+        diff_display = inline_word_diff_html(original_text, item["text"])
+        st.markdown(diff_display, unsafe_allow_html=True)
+
+        col_a, col_b = st.columns([3, 1])
+        with col_a:
+            new_text = st.text_area(f"Edit Candidate {clause_index}_{rank}", value=item["text"], key=f"candidate_edit_{clause_index}_{rank}", height=120)
+        with col_b:
+            if st.button(f"✅ Accept #{rank}", key=f"accept_{clause_index}_{rank}"):
+                if "labeled_chunks" in st.session_state and 0 <= clause_index < len(st.session_state.labeled_chunks):
+                    st.session_state.labeled_chunks[clause_index]["text"] = new_text
+                    st.session_state.neg_counters[f"counter_{clause_index}"] = new_text
+                    add_turn("you", new_text, persona, "accepted_offer")
+                    log_feedback(clause_index, original_text, new_text, True, item["meta"], raw_score, "replace")
+                    st.success(f"Accepted candidate #{rank} for Clause {clause_index + 1}")
+
+# ---------- Contract Type Selection ----------
+st.title("📄 Smart Contract Assistant")
+st.markdown("Choose the type of contract you're working with:")
+
+contract_types = {
+    "employment": "💼 Employment",
+    "rental": "🏠 Rental/Lease",
+    "nda": "🔒 Non-Disclosure (NDA)",
+    "service": "🧰 Service Agreement",
+    "sales": "🛒 Sales/Purchase",
+    "other": "📁 Other"
+}
+
+selected_type = st.selectbox("Contract Type", list(contract_types.values()))
+st.session_state.contract_type = [k for k, v in contract_types.items() if v == selected_type][0]
+
+if st.button("📄 Load Sample Contract"):
+    sample_text = get_sample_contract(st.session_state.contract_type)
+    st.session_state.negotiation_text = sample_text
+    st.session_state.contract_loaded = True
+    st.success(f"Sample {contract_types[st.session_state.contract_type]} contract loaded.")
+
+# ---------- Session defaults ----------
+_defaults = {
+    "neg_personas": {},
+    "neg_counters": {},
+    "neg_simulated": {},
+    "neg_turns": [],
+    "labeled_chunks": [],
+    "negotiation_text": "",
+    "saved_personas": load_personas(),
+    "contract_loaded": False,
+}
+for k, v in _defaults.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
+load_session_state()
+
+# ---------- Sidebar ----------
+st.sidebar.title("📄 Contract Intelligence")
+st.sidebar.markdown("Build smarter contracts with zero budget")
+
+with st.sidebar.expander("📁 Upload Contract"):
+    uploaded_file = st.file_uploader("Choose a contract file", type=["pdf", "docx", "txt"])
+    if uploaded_file:
+        text = load_contract(uploaded_file)
+        st.session_state.negotiation_text = text
+        st.session_state.contract_loaded = True
+
+with st.sidebar.expander("🌐 Import from Link"):
+    contract_url = st.text_input("Paste contract URL (PDF, DOCX, or TXT)")
+    if contract_url:
+        try:
+            response = requests.get(contract_url)
+            if response.status_code == 200:
+                temp_file = tempfile.NamedTemporaryFile(delete=False)
+                temp_file.write(response.content)
+                temp_file.flush()
+                temp_file.seek(0)
+                text = load_contract(temp_file)
+                st.session_state.negotiation_text = text
+                st.success("Contract imported from link.")
+            else:
+                st.warning(f"Failed to fetch document. Status code: {response.status_code}")
+        except Exception as e:
+            st.error(f"Error fetching document: {e}")
+
+learn_mode = st.sidebar.checkbox("🧠 Learn as You Go", value=True)
+summarize_enabled = st.sidebar.checkbox("Summarize clauses", value=True)
+translate_enabled = st.sidebar.checkbox("Translate to Hungarian", value=False)
+
+with st.sidebar.expander("🧠 Persona Settings"):
+    persona = st.text_input("Persona name", value=st.session_state.neg_personas.get("default", {}).get("persona", "Startup Founder"))
+    style = st.selectbox("Rewrite style", ["Plain English", "Legalese", "Assertive", "Concise", "Friendly"])
+    st.session_state.neg_personas["default"] = {"persona": persona, "style": style}
+
+with st.sidebar.expander("📊 Advanced Controls"):
+    ranking_mode = st.selectbox("Ranking mode", ["Auto (Classifier)", "Heuristic Only"])
+    if st.button("Improve Suggestions (Train Model)"):
+        res = ranking.train_feedback_model()
+        if res.get("ok"):
+            st.success("Model training complete.")
+        else:
+            st.warning(f"Training skipped: {res.get('reason')}")
+
+if st.sidebar.button("💾 Save Session"):
+    save_session_state()
+if st.sidebar.button("📂 Load Session"):
+    load_session_state()
+if st.sidebar.button("🔁 Clear Counters"):
+    st.session_state.neg_counters = {}
+    st.success("Cleared accepted counters.")
+
+# ---------- Main UI ----------
+if st.session_state.negotiation_text:
+    st.subheader("📜 Original Contract Text")
+    st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
+
+    if st.button("🔍 Analyze Clauses"):
+        chunks = chunk_contract(st.session_state.negotiation_text)
+        labeled = []
+        for i, chunk in enumerate(chunks):
+            clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
+            summary = summarize_clause(chunk) if summarize_enabled else ""
+            translated = translate_to_hungarian(chunk) if translate_enabled else ""
+            labeled.append({
+                "id": i,
+                "text": chunk,
+                "type": clause_type,
+                "risk": risk_level,
+                "summary": summary,
+                "translated": translated
+            })
+        st.session_state.labeled_chunks = labeled
+        st.success(f"{len(labeled)} clauses analyzed.")
+
+        # ---------- Risk Summary Chart ----------
+        risk_counts = {"High": 0, "Medium": 0, "Low": 0}
+        for c in labeled:
+            if c["risk"] in risk_counts:
+                risk_counts[c["risk"]] += 1
+
+        fig, ax = plt.subplots()
+        ax.bar(risk_counts.keys(), risk_counts.values(), color=["red", "orange", "green"])
+        ax.set_title("Clause Risk Summary")
+        ax.set_ylabel("Number of Clauses")
+        st.pyplot(fig)
+
+# ---------- Clause Review ----------
+if st.session_state.labeled_chunks:
+    st.subheader("🧩 Clause Review")
+
+    risk_filter = st.selectbox("Filter by Risk Level", ["All", "High", "Medium", "Low"])
+    type_filter = st.selectbox("Filter by Clause Type", ["All"] + sorted(set(c["type"] for c in st.session_state.labeled_chunks)))
+
+    filtered_clauses = [
+        c for c in st.session_state.labeled_chunks
+        if (risk_filter == "All" or c["risk"] == risk_filter)
+        and (type_filter == "All" or c["type"] == type_filter)
+    ]
+
+    for i, clause in enumerate(filtered_clauses):
+        with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
+            st.markdown(highlight_risks(clause["text"]), unsafe_allow_html=True)
+
+            if clause["summary"]:
+                st.markdown(f"**Summary:** {clause['summary']}")
+            if clause["translated"]:
+                st.markdown(f"**Hungarian Translation:** {clause['translated']}")
+
+            risk_note = explain_clause_risk(clause["text"], clause["type"], clause["risk"])
+            if risk_note:
+                st.markdown(f"**Why this clause matters:** {risk_note}")
+
+            if learn_mode:
+                st.markdown("**🧠 Do you understand this clause?**")
+                understanding = st.radio(
+                    f"Understanding Check {clause['id']}",
+                    ["Yes", "Not sure", "No"],
+                    key=f"learn_check_{clause['id']}"
+                )
+                if understanding == "No":
+                    explanation = get_clause_explanation(clause["type"])
+                    st.info(f"**Explanation:** {explanation}")
+
+            present_top_candidates_ui(clause["text"], clause["id"], persona, style, ranking_mode)
