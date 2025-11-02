@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile
 from core.analysis import label_clause, explain_clause_risk, get_clause_explanation
 from fastapi.middleware.cors import CORSMiddleware
+from pdfminer.high_level import extract_text
 
 app = FastAPI()
 app.add_middleware(
@@ -13,10 +14,13 @@ app.add_middleware(
 
 @app.post("/analyze")
 async def analyze_clause(file: UploadFile, contract_type: str = "nda"):
-    text = (await file.read()).decode()
+    contents = await file.read()
+    text = extract_text(BytesIO(contents))  # Extract text from PDF
+
     clause_type, risk = label_clause(text, contract_type)
     explanation = get_clause_explanation(clause_type)
     risk_note = explain_clause_risk(text, clause_type, risk)
+
     return {
         "clause_type": clause_type,
         "risk_level": risk,

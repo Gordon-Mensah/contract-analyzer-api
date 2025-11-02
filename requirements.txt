@@ -17,3 +17,4 @@ diff-match-patch>=20200713
 fastapi>=0.103.0
 uvicorn>=0.23.0
 python-multipart>=0.0.5
+pdfminer.six>=20221105
