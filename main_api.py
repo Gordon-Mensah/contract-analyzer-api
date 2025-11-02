@@ -32,3 +32,7 @@ async def analyze_clause(file: UploadFile, contract_type: str = "nda"):
         }
     except Exception as e:
         return {"detail": f"Error processing file: {str(e)}"}
+    print(f"File size: {len(contents)} bytes")
+    print(f"Extracted text: {text[:500]}")
+
+
