@@ -20,7 +20,7 @@ from core.analysis import (
 
 from core.analysis import explain_clause_text
 from core.models import get_summarizer
-from core.utils import highlight_risks, format_badges, translate_to_hungarian
+from core.utils import highlight_risks, format_badges
 from core.negotiation import summarize_clause, add_turn
 from core.export import inline_word_diff_html
 from core.samples import get_sample_contract
