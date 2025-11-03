@@ -39,8 +39,8 @@ for i in range(1):  # Only generate 1 suggestion
             text = original_text[:200] + "..."
         candidates.append(text)
 
-    for rank, text in enumerate(candidates, start=1):
-        st.markdown(f"#### #{rank}")
+        for rank, text in enumerate(candidates, start=1):
+            st.markdown(f"#### #{rank}")
         from core.export import inline_word_diff_html
         diff_display = inline_word_diff_html(original_text, text)
         st.markdown(diff_display, unsafe_allow_html=True)
