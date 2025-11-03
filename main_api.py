@@ -3,6 +3,8 @@ from core.analysis import label_clause, explain_clause_risk, get_clause_explanat
 from fastapi.middleware.cors import CORSMiddleware
 from pdfminer.high_level import extract_text
 import pdfplumber
+from io import BytesIO
+
 
 app = FastAPI()
 app.add_middleware(
