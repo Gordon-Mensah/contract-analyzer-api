@@ -200,7 +200,7 @@ if st.session_state.labeled_chunks:
         with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
             st.markdown(highlight_risks(clause["text"]), unsafe_allow_html=True)
 
-                        if clause["summary"]:
+            if clause["summary"]:
                 st.markdown(f"**Summary:** {clause['summary']}")
 
             if clause["translated"]:
