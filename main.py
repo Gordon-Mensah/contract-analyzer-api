@@ -196,8 +196,8 @@ if st.session_state.labeled_chunks:
         and (type_filter == "All" or c["type"] == type_filter)
     ]
     for key in list(st.session_state.keys()):
-    if key.startswith("candidate_edit_") or key.startswith("learn_check_"):
-        del st.session_state[key]
+        if key.startswith("candidate_edit_") or key.startswith("learn_check_"):
+            del st.session_state[key]
 
 
     for i, clause in enumerate(filtered_clauses):
