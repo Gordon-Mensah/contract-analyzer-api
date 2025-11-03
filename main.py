@@ -194,47 +194,47 @@ if st.session_state.labeled_chunks:
             del st.session_state[key]
 
         for i, clause in enumerate(filtered_clauses):
-        with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
-            st.markdown(highlight_risks(clause["text"]), unsafe_allow_html=True)
+    with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
+        st.markdown(highlight_risks(clause["text"]), unsafe_allow_html=True)
 
-            if clause["summary"]:
-                st.markdown(f"**Summary:** {clause['summary']}")
+        if clause["summary"]:
+            st.markdown(f"**Summary:** {clause['summary']}")
 
-            risk_note = explain_clause_risk(clause["text"], clause["type"], clause["risk"])
-            if risk_note:
-                st.markdown(f"**Why this clause matters:** {risk_note}")
+        risk_note = explain_clause_risk(clause["text"], clause["type"], clause["risk"])
+        if risk_note:
+            st.markdown(f"**Why this clause matters:** {risk_note}")
 
-            # 🔍 Civilian-friendly suggestions
-            if clause["risk"] in ["High", "Medium"]:
-                st.markdown("💬 **What you could ask:**")
-                if clause["type"] == "Termination":
-                    st.markdown("- Can we extend the notice period?")
-                    st.markdown("- Can termination only happen with cause?")
-                elif clause["type"] == "Payment":
-                    st.markdown("- Can we clarify late fees or payment schedule?")
-                elif clause["type"] == "Confidentiality":
-                    st.markdown("- Can we limit how long confidentiality lasts?")
-                elif clause["type"] == "Liability":
-                    st.markdown("- Can we cap the damages or limit responsibility?")
-                elif clause["type"] == "IP":
-                    st.markdown("- Can we clarify who owns the work created?")
-                elif clause["type"] == "Scope":
-                    st.markdown("- Can we define exactly what services are included?")
+        # Civilian-friendly suggestions
+        if clause["risk"] in ["High", "Medium"]:
+            st.markdown("💬 **What you could ask:**")
+            if clause["type"] == "Termination":
+                st.markdown("- Can we extend the notice period?")
+                st.markdown("- Can termination only happen with cause?")
+            elif clause["type"] == "Payment":
+                st.markdown("- Can we clarify late fees or payment schedule?")
+            elif clause["type"] == "Confidentiality":
+                st.markdown("- Can we limit how long confidentiality lasts?")
+            elif clause["type"] == "Liability":
+                st.markdown("- Can we cap the damages or limit responsibility?")
+            elif clause["type"] == "IP":
+                st.markdown("- Can we clarify who owns the work created?")
+            elif clause["type"] == "Scope":
+                st.markdown("- Can we define exactly what services are included?")
 
-            # 🧠 Learn mode explanation
-            if learn_mode:
-                st.markdown("**🧠 Do you understand this clause?**")
-                understanding = st.radio(
-                    f"Understanding Check {clause['id']}",
-                    ["Yes", "Not sure", "No"],
-                    key=f"learn_check_{clause['id']}"
-                )
-                if understanding == "No":
-                    explanation = explain_clause_text(clause["text"])
-                    if explanation:
-                        st.info(f"🧾 **What this clause means in simple terms:**\n\n{explanation}")
-                    else:
-                        st.warning("⚠️ Sorry, I couldn't simplify this clause at the moment.")
+        # Learn mode explanation
+        if learn_mode:
+            st.markdown("**🧠 Do you understand this clause?**")
+            understanding = st.radio(
+                f"Understanding Check {clause['id']}",
+                ["Yes", "Not sure", "No"],
+                key=f"learn_check_{clause['id']}"
+            )
+            if understanding == "No":
+                explanation = explain_clause_text(clause["text"])
+                if explanation:
+                    st.info(f"🧾 **What this clause means in simple terms:**\n\n{explanation}")
+                else:
+                    st.warning("⚠️ Sorry, I couldn't simplify this clause at the moment.")
 
-            # ✨ Counter-proposal UI
-            present_top_candidates_ui(clause["text"], clause["id"], persona, style)
+        present_top_candidates_ui(clause["text"], clause["id"], persona, style)
+
