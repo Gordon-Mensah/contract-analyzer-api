@@ -2,7 +2,6 @@
 
 import html, re, json
 from hashlib import sha256
-from deep_translator import GoogleTranslator
 
 RISK_HIGHLIGHTS = {
     "indemnify": "background:#ffd6d6",
@@ -21,11 +20,6 @@ def mkhash(*args) -> str:
             h.update(json.dumps(a, sort_keys=True, default=str).encode("utf-8"))
     return h.hexdigest()
 
-def translate_to_hungarian(text):
-    try:
-        return GoogleTranslator(source='auto', target='hu').translate(text)
-    except Exception:
-        return ""
 
 def highlight_risks(text):
     safe = html.escape(text)

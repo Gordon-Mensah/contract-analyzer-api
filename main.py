@@ -128,7 +128,6 @@ with st.sidebar.expander("🌐 Import from Link"):
 
 learn_mode = st.sidebar.checkbox("🧠 Learn as You Go", value=True)
 summarize_enabled = st.sidebar.checkbox("Summarize clauses", value=True)
-translate_enabled = st.sidebar.checkbox("Translate to Hungarian", value=False)
 
 with st.sidebar.expander("🧠 Persona Settings"):
     persona = st.text_input("Persona name", value=st.session_state.neg_personas.get("default", {}).get("persona", "Startup Founder"))
@@ -156,7 +155,7 @@ if st.session_state.negotiation_text:
         for i, chunk in enumerate(chunks):
             clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
             summary = summarize_clause(chunk) if summarize_enabled else ""
-            translated = translate_to_hungarian(chunk) if translate_enabled else ""
+            translated = ""
             labeled.append({
                 "id": i,
                 "text": chunk,
@@ -205,9 +204,6 @@ if st.session_state.labeled_chunks:
 
             if clause["summary"]:
                 st.markdown(f"**Summary:** {clause['summary']}")
-
-            if clause["translated"]:
-                st.markdown(f"**Hungarian Translation:** {clause['translated']}")
 
             risk_note = explain_clause_risk(clause["text"], clause["type"], clause["risk"])
             if risk_note:

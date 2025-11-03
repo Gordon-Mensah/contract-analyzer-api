@@ -181,15 +181,17 @@ def explain_clause_risk(clause_text, clause_type, risk_level):
 def get_clause_explanation(clause_type):
     return clause_type_explanations.get(clause_type, "This clause type is not yet explained.")
 
-# ---------- New: Explain Clause Text ----------
-@lru_cache(maxsize=1)
-def get_explainer():
-        return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-
 def explain_clause_text(text):
-    explainer = get_explainer()
-    try:
-        summary = explainer(text, max_length=100, min_length=30, do_sample=False)
-        return summary[0]["summary_text"]
-    except Exception:
-        return "Sorry, I couldn't simplify this clause at the moment."
+    text_lower = text.lower()
+    if "termination" in text_lower:
+        return "This clause explains how and when the contract can be ended by either party."
+    elif "confidential" in text_lower or "nda" in text_lower:
+        return "This clause ensures that sensitive information shared between parties remains private."
+    elif "payment" in text_lower:
+        return "This clause outlines how and when payments will be made."
+    elif "liability" in text_lower:
+        return "This clause defines who is responsible if something goes wrong."
+    else:
+        return "This clause covers general terms and conditions related to the agreement."
+
+

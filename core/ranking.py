@@ -11,7 +11,9 @@ from core.analysis import label_clause
 from core.models import get_embedder
 import diskcache as dc
 
-cache = dc.Cache(".cache_disk")
+cache_dir = os.path.join(os.getcwd(), ".cache_disk")
+os.makedirs(cache_dir, exist_ok=True)
+cache = dc.Cache(cache_dir)
 
 def embed_text(text):
     key = "embed_text:" + mkhash(text)
