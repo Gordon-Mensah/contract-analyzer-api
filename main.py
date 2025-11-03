@@ -226,6 +226,23 @@ if st.session_state.labeled_chunks:
 
 
 
+                        def summarize_contract(text):
+                            summarizer = get_summarizer()
+                            try:
+                                out = summarizer(text, max_length=300, min_length=100, do_sample=False)
+                                return out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
+                            except Exception:
+                                return text[:500] + "..." if len(text) > 500 else text
+                            
+
+                            @lru_cache(maxsize=1)
+                            def get_summarizer():
+                                    return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+
+
+
+
+
 
 
 
