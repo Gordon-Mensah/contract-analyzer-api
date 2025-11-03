@@ -16,21 +16,22 @@ from core.analysis import (
     explain_clause_risk,
     get_clause_explanation
 )
-from core.models import get_summarizer, get_embedder
-from core.utils import highlight_risks, format_badges, translate_to_hungarian, mkhash
-from core.negotiation import summarize_clause, add_turn, auto_negotiate_simulation
-from core.export import export_tracked_html, build_docx_with_diffs
+from core.models import get_summarizer
+from core.utils import highlight_risks, format_badges, translate_to_hungarian
+from core.negotiation import summarize_clause, add_turn
+from core.export import inline_word_diff_html
 from core.samples import get_sample_contract
 
 st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout="wide")
 
 # ---------- Candidate presentation helper ----------
 def present_top_candidates_ui(original_text, clause_index, persona, style):
-    st.markdown("### ✨ Suggested Counter-Proposals")
+    st.markdown("### ✨ Suggested Counter-Proposal")
     summarizer = get_summarizer()
     candidates = []
     base_prompt = f"Rewrite the following {st.session_state.contract_type} clause for negotiation. Persona: {persona}. Style: {style}.\n\nClause:\n{original_text}"
-for i in range(1):  # Only generate 1 suggestion
+    
+    for i in range(1):  # Only generate 1 suggestion
         prompt = base_prompt + f"\n\nCandidate variation: {i+1}"
         try:
             out = summarizer(prompt, max_length=120, min_length=30, do_sample=True, top_k=50, top_p=0.95)
@@ -39,9 +40,8 @@ for i in range(1):  # Only generate 1 suggestion
             text = original_text[:200] + "..."
         candidates.append(text)
 
-        for rank, text in enumerate(candidates, start=1):
-            st.markdown(f"#### #{rank}")
-        from core.export import inline_word_diff_html
+    for rank, text in enumerate(candidates, start=1):
+        st.markdown(f"#### #{rank}")
         diff_display = inline_word_diff_html(original_text, text)
         st.markdown(diff_display, unsafe_allow_html=True)
 
@@ -140,19 +140,13 @@ if st.sidebar.button("🔁 Clear Counters"):
     st.session_state.neg_counters = {}
     st.success("Cleared accepted counters.")
 
-    # clause analysis loop
-chunks = chunk_contract(st.session_state.negotiation_text)
-chunks = chunks[:20]
-...
-
-st.write(f"⏱️ Clause analysis took {time.time() - start:.2f} seconds")
-
 # ---------- Main UI ----------
 if st.session_state.negotiation_text:
     st.subheader("📜 Original Contract Text")
     st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
 
     if st.button("🔍 Analyze Clauses"):
+        start = time.time()
         chunks = chunk_contract(st.session_state.negotiation_text)
         chunks = chunks[:20]  # Limit to first 20 clauses
         labeled = []
@@ -170,6 +164,7 @@ if st.session_state.negotiation_text:
             })
         st.session_state.labeled_chunks = labeled
         st.success(f"{len(labeled)} clauses analyzed.")
+        st.write(f"⏱️ Clause analysis took {time.time() - start:.2f} seconds")
 
         # ---------- Risk Summary Chart ----------
         risk_counts = {"High": 0, "Medium": 0, "Low": 0}
@@ -195,17 +190,19 @@ if st.session_state.labeled_chunks:
         if (risk_filter == "All" or c["risk"] == risk_filter)
         and (type_filter == "All" or c["type"] == type_filter)
     ]
+
+    # Clean up session keys
     for key in list(st.session_state.keys()):
         if key.startswith("candidate_edit_") or key.startswith("learn_check_"):
             del st.session_state[key]
-
 
     for i, clause in enumerate(filtered_clauses):
         with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
             st.markdown(highlight_risks(clause["text"]), unsafe_allow_html=True)
 
-            if clause["summary"]:
+                        if clause["summary"]:
                 st.markdown(f"**Summary:** {clause['summary']}")
+
             if clause["translated"]:
                 st.markdown(f"**Hungarian Translation:** {clause['translated']}")
 
@@ -223,3 +220,5 @@ if st.session_state.labeled_chunks:
                 if understanding == "No":
                     explanation = get_clause_explanation(clause["type"])
                     st.info(f"**Explanation:** {explanation}")
+
+            present_top_candidates_ui(clause["text"], clause["id"], persona, style)
