@@ -22,49 +22,49 @@ class UploadScreen extends StatefulWidget {
 }
 
 class _UploadScreenState extends State<UploadScreen> {
-  List<dynamic>? analysisResults;
+  Map<String, dynamic>? analysisResult;
   String errorMessage = '';
   bool isLoading = false;
 
   Future<void> analyzeContract() async {
-  final picked = await FilePicker.platform.pickFiles();
-  if (picked == null) return;
+    final picked = await FilePicker.platform.pickFiles();
+    if (picked == null) return;
 
-  final file = picked.files.first;
-  final uri = Uri.parse('https://contract-analyzer-api-ufao.onrender.com/analyze?contract_type=nda');
+    final file = picked.files.first;
+    final apiUrl = "https://contract-analyzer-api-ufao.onrender.com/analyze";
 
-  setState(() {
-    isLoading = true;
-    analysisResults = null;
-    errorMessage = '';
-  });
+    setState(() {
+      isLoading = true;
+      analysisResult = null;
+      errorMessage = '';
+    });
 
-  try {
-    final request = http.MultipartRequest('POST', uri);
-    request.files.add(http.MultipartFile.fromBytes('file', file.bytes!, filename: file.name));
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+      request.fields['contract_type'] = 'nda'; // Required by backend
+      request.files.add(http.MultipartFile.fromBytes('file', file.bytes!, filename: file.name));
 
-    final streamedResponse = await request.send();
-    final respStr = await streamedResponse.stream.bytesToString();
+      final streamedResponse = await request.send();
+      final respStr = await streamedResponse.stream.bytesToString();
 
-    if (streamedResponse.statusCode == 200) {
+      if (streamedResponse.statusCode == 200) {
+        setState(() {
+          analysisResult = jsonDecode(respStr);
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = 'Error ${streamedResponse.statusCode}: $respStr';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        analysisResults = jsonDecode(respStr);
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        errorMessage = 'Error ${streamedResponse.statusCode}: $respStr';
+        errorMessage = 'Exception: $e';
         isLoading = false;
       });
     }
-  } catch (e) {
-    setState(() {
-      errorMessage = 'Exception: $e';
-      isLoading = false;
-    });
   }
-}
-
 
   Widget buildResultCard(Map<String, dynamic> data) {
     String clauseType = data['clause_type'] ?? 'Unknown';
@@ -146,17 +146,8 @@ class _UploadScreenState extends State<UploadScreen> {
             if (isLoading) CircularProgressIndicator(),
             if (errorMessage.isNotEmpty)
               Text(errorMessage, style: TextStyle(color: Colors.red)),
-            if (analysisResults != null)
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: analysisResults!.length,
-                    itemBuilder: (context, index) {
-                      final clause = analysisResults![index] as Map<String, dynamic>;
-                      return buildResultCard(clause);
-                    },
-                  ),
-                ),
-
+            if (analysisResult != null)
+              Expanded(child: buildResultCard(analysisResult!)),
           ],
         ),
       ),

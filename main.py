@@ -18,16 +18,14 @@ from core.analysis import (
 )
 from core.models import get_summarizer, get_embedder
 from core.utils import highlight_risks, format_badges, translate_to_hungarian, mkhash
-from core.ranking import score_candidate_heuristic, predict_accept_prob, log_feedback, embed_text
 from core.negotiation import summarize_clause, add_turn, auto_negotiate_simulation
 from core.export import export_tracked_html, build_docx_with_diffs
-import core.ranking as ranking
 from core.samples import get_sample_contract
 
 st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout="wide")
 
 # ---------- Candidate presentation helper ----------
-def present_top_candidates_ui(original_text, clause_index, persona, style, ranking_mode):
+def present_top_candidates_ui(original_text, clause_index, persona, style):
     st.markdown("### ✨ Suggested Counter-Proposals")
     summarizer = get_summarizer()
     candidates = []
@@ -41,37 +39,21 @@ def present_top_candidates_ui(original_text, clause_index, persona, style, ranki
             text = original_text[:200] + "..."
         candidates.append(text)
 
-    scored = []
-    for c in candidates:
-        heur_score, meta = score_candidate_heuristic(original_text, c)
-        meta_ext = meta.copy()
-        meta_ext["original_len"] = len(original_text)
-        meta_ext["candidate_len"] = len(c)
-        prob = predict_accept_prob(meta_ext) if ranking_mode.startswith("Auto") else None
-        rank_score = prob if prob is not None else heur_score
-        scored.append({"text": c, "heur_score": heur_score, "meta": meta_ext, "prob": prob, "rank_score": rank_score})
-    scored = sorted(scored, key=lambda x: x["rank_score"], reverse=True)
-
-    for rank, item in enumerate(scored, start=1):
-        raw_score = item["prob"] if item["prob"] is not None else item["heur_score"]
-        score_100 = int(round(raw_score * 100))
-        score_type = "ML Prediction" if item["prob"] is not None else "Heuristic"
-        st.markdown(f"#### #{rank} — Score: **{score_100}/100** ({score_type})")
-        st.markdown(f"- **Similarity:** {item['meta']['similarity']:.3f}; **Risk Delta:** {item['meta']['risk_delta']:.1f}; **Length Score:** {item['meta']['len_penalty']:.3f}")
+    for rank, text in enumerate(candidates, start=1):
+        st.markdown(f"#### #{rank}")
         from core.export import inline_word_diff_html
-        diff_display = inline_word_diff_html(original_text, item["text"])
+        diff_display = inline_word_diff_html(original_text, text)
         st.markdown(diff_display, unsafe_allow_html=True)
 
         col_a, col_b = st.columns([3, 1])
         with col_a:
-            new_text = st.text_area(f"Edit Candidate {clause_index}_{rank}", value=item["text"], key=f"candidate_edit_{clause_index}_{rank}", height=120)
+            new_text = st.text_area(f"Edit Candidate {clause_index}_{rank}", value=text, key=f"candidate_edit_{clause_index}_{rank}", height=120)
         with col_b:
             if st.button(f"✅ Accept #{rank}", key=f"accept_{clause_index}_{rank}"):
                 if "labeled_chunks" in st.session_state and 0 <= clause_index < len(st.session_state.labeled_chunks):
                     st.session_state.labeled_chunks[clause_index]["text"] = new_text
                     st.session_state.neg_counters[f"counter_{clause_index}"] = new_text
                     add_turn("you", new_text, persona, "accepted_offer")
-                    log_feedback(clause_index, original_text, new_text, True, item["meta"], raw_score, "replace")
                     st.success(f"Accepted candidate #{rank} for Clause {clause_index + 1}")
 
 # ---------- Contract Type Selection ----------
@@ -149,15 +131,6 @@ with st.sidebar.expander("🧠 Persona Settings"):
     persona = st.text_input("Persona name", value=st.session_state.neg_personas.get("default", {}).get("persona", "Startup Founder"))
     style = st.selectbox("Rewrite style", ["Plain English", "Legalese", "Assertive", "Concise", "Friendly"])
     st.session_state.neg_personas["default"] = {"persona": persona, "style": style}
-
-with st.sidebar.expander("📊 Advanced Controls"):
-    ranking_mode = st.selectbox("Ranking mode", ["Auto (Classifier)", "Heuristic Only"])
-    if st.button("Improve Suggestions (Train Model)"):
-        res = ranking.train_feedback_model()
-        if res.get("ok"):
-            st.success("Model training complete.")
-        else:
-            st.warning(f"Training skipped: {res.get('reason')}")
 
 if st.sidebar.button("💾 Save Session"):
     save_session_state()
@@ -239,4 +212,4 @@ if st.session_state.labeled_chunks:
                     explanation = get_clause_explanation(clause["type"])
                     st.info(f"**Explanation:** {explanation}")
 
-            present_top_candidates_ui(clause["text"], clause["id"], persona, style, ranking_mode)
+present_top_candidates_ui(clause["text"], clause["id"], persona, style)
