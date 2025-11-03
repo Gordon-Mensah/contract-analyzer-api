@@ -145,14 +145,14 @@ if st.sidebar.button("🔁 Clear Counters"):
     st.success("Cleared accepted counters.")
 
 # ---------- Main UI ----------
-st.subheader("🧾 Contract Summary")
-summary = summarize_contract(st.session_state.negotiation_text)
-st.markdown(summary)
-
 
 if st.session_state.negotiation_text:
     st.subheader("📜 Original Contract Text")
     st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
+
+    st.subheader("🧾 Contract Summary")
+    summary = summarize_contract(st.session_state.negotiation_text)
+    st.markdown(summary)
 
     if st.button("🔍 Analyze Clauses"):
         start = time.time()
