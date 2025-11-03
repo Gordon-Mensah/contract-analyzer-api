@@ -220,7 +220,7 @@ if st.session_state.labeled_chunks:
                 if understanding == "No":
                     from core.analysis import explain_clause_text
                     explanation = explain_clause_text(clause["text"])
-                    st.info(f"**Plain English Explanation:** {explanation}"
+                    st.info(f"**Plain English Explanation:** {explanation}")
 
 
             present_top_candidates_ui(clause["text"], clause["id"], persona, style)
