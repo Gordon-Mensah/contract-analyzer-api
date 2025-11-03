@@ -24,6 +24,7 @@ from core.utils import highlight_risks, format_badges, translate_to_hungarian
 from core.negotiation import summarize_clause, add_turn
 from core.export import inline_word_diff_html
 from core.samples import get_sample_contract
+from core.analysis import summarize_contract
 
 st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout="wide")
 

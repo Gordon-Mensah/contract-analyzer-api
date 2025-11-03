@@ -13,6 +13,10 @@ except Exception:
 from transformers import pipeline
 from functools import lru_cache
 
+@lru_cache(maxsize=1)
+def get_summarizer():
+    return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+
 # ---------- Clause Detection Maps ----------
 keyword_map = {
     "nda": {
@@ -194,4 +198,11 @@ def explain_clause_text(text):
     else:
         return "This clause covers general terms and conditions related to the agreement."
 
+def summarize_contract(text):
+    summarizer = get_summarizer()
+    try:
+        out = summarizer(text, max_length=300, min_length=100, do_sample=False)
+        return out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
+    except Exception:
+        return text[:500] + "..." if len(text) > 500 else text
 
