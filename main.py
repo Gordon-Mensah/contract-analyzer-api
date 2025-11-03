@@ -211,5 +211,3 @@ if st.session_state.labeled_chunks:
                 if understanding == "No":
                     explanation = get_clause_explanation(clause["type"])
                     st.info(f"**Explanation:** {explanation}")
-
-present_top_candidates_ui(clause["text"], clause["id"], persona, style)
