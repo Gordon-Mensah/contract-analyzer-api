@@ -19,10 +19,13 @@ async def analyze_clause(file: UploadFile, contract_type: str = "nda"):
         contents = await file.read()
         print(f"File size: {len(contents)} bytes")
 
+        if file.content_type != "application/pdf":
+            return {"detail": "Uploaded file is not a PDF"}
+
         with pdfplumber.open(BytesIO(contents)) as pdf:
             text = "\n".join(page.extract_text() or "" for page in pdf.pages)
 
-        print(f"Extracted text: {text[:500]}")  # Show first 500 characters
+        print(f"Extracted text: {text[:500]}")
 
         clause_type, risk = label_clause(text, contract_type)
         explanation = get_clause_explanation(clause_type)
