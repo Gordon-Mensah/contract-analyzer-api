@@ -151,7 +151,7 @@ if st.session_state.negotiation_text:
     if st.button("🔍 Analyze Clauses"):
         start = time.time()
         chunks = chunk_contract(st.session_state.negotiation_text)
-        chunks = chunks[:20]  # Limit to first 20 clauses
+        chunks = chunks[:10000]  # Limit to first 20 clauses
         labeled = []
         for i, chunk in enumerate(chunks):
             clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
