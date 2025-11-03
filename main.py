@@ -108,9 +108,7 @@ with st.sidebar.expander("📁 Upload Contract"):
         text = load_contract(uploaded_file)
         st.session_state.negotiation_text = text
         st.session_state.contract_loaded = True
-st.subheader("🧾 Contract Summary")
-summary = summarize_contract(contract_text)
-st.markdown(summary)
+        
 
 with st.sidebar.expander("🌐 Import from Link"):
     contract_url = st.text_input("Paste contract URL (PDF, DOCX, or TXT)")
@@ -147,6 +145,11 @@ if st.sidebar.button("🔁 Clear Counters"):
     st.success("Cleared accepted counters.")
 
 # ---------- Main UI ----------
+st.subheader("🧾 Contract Summary")
+summary = summarize_contract(st.session_state.negotiation_text)
+st.markdown(summary)
+
+
 if st.session_state.negotiation_text:
     st.subheader("📜 Original Contract Text")
     st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
