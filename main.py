@@ -27,9 +27,6 @@ from core.samples import get_sample_contract
 from core.analysis import summarize_contract
 
 st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout="wide")
-st.subheader("🧾 Contract Summary")
-summary = summarize_contract(contract_text)
-st.markdown(summary)
 
 # ---------- Candidate presentation helper ----------
 def present_top_candidates_ui(original_text, clause_index, persona, style):
@@ -111,6 +108,9 @@ with st.sidebar.expander("📁 Upload Contract"):
         text = load_contract(uploaded_file)
         st.session_state.negotiation_text = text
         st.session_state.contract_loaded = True
+st.subheader("🧾 Contract Summary")
+summary = summarize_contract(contract_text)
+st.markdown(summary)
 
 with st.sidebar.expander("🌐 Import from Link"):
     contract_url = st.text_input("Paste contract URL (PDF, DOCX, or TXT)")
