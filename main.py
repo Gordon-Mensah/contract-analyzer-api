@@ -14,8 +14,10 @@ from core.analysis import (
     chunk_contract,
     label_clause,
     explain_clause_risk,
-    get_clause_explanation
+    get_clause_explanation,
+    explain_clause_text
 )
+
 from core.analysis import explain_clause_text
 from core.models import get_summarizer
 from core.utils import highlight_risks, format_badges, translate_to_hungarian
