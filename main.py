@@ -16,6 +16,7 @@ from core.analysis import (
     explain_clause_risk,
     get_clause_explanation
 )
+from core.analysis import explain_clause_text
 from core.models import get_summarizer
 from core.utils import highlight_risks, format_badges, translate_to_hungarian
 from core.negotiation import summarize_clause, add_turn
@@ -217,10 +218,13 @@ if st.session_state.labeled_chunks:
                     ["Yes", "Not sure", "No"],
                     key=f"learn_check_{clause['id']}"
                 )
-                if understanding == "No":
-                    from core.analysis import explain_clause_text
-                    explanation = explain_clause_text(clause["text"])
-                    st.info(f"**Plain English Explanation:** {explanation}")
+                from core.analysis import explain_clause_text
+                explanation = explain_clause_text(clause["text"])
+                st.write(f"DEBUG: explanation = {explanation}")
+                st.info(f"🧾 **What this clause means in simple terms:**\n\n{explanation}")
+
+
+
 
 
             present_top_candidates_ui(clause["text"], clause["id"], persona, style)
