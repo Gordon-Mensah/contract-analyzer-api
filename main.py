@@ -220,10 +220,13 @@ if st.session_state.labeled_chunks:
                     ["Yes", "Not sure", "No"],
                     key=f"learn_check_{clause['id']}"
                 )
-                from core.analysis import explain_clause_text
-                explanation = explain_clause_text(clause["text"])
-                st.write(f"DEBUG: explanation = {explanation}")
-                st.info(f"🧾 **What this clause means in simple terms:**\n\n{explanation}")
+                if understanding == "No":
+                    explanation = explain_clause_text(clause["text"])
+                    if explanation:
+                        st.info(f"🧾 **What this clause means in simple terms:**\n\n{explanation}")
+                    else:
+                        st.warning("⚠️ Sorry, I couldn't simplify this clause at the moment.")
+
 
 
 
