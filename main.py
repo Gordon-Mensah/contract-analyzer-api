@@ -218,7 +218,9 @@ if st.session_state.labeled_chunks:
                     key=f"learn_check_{clause['id']}"
                 )
                 if understanding == "No":
-                    explanation = get_clause_explanation(clause["type"])
-                    st.info(f"**Explanation:** {explanation}")
+                    from core.analysis import explain_clause_text
+                    explanation = explain_clause_text(clause["text"])
+                    st.info(f"**Plain English Explanation:** {explanation}"
+
 
             present_top_candidates_ui(clause["text"], clause["id"], persona, style)
