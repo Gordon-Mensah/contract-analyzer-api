@@ -4,7 +4,7 @@ import tempfile
 import io
 import sys, os
 sys.path.append(os.path.dirname(__file__))
-
+import time
 import matplotlib.pyplot as plt
 
 from core.config import CACHE_DIR
@@ -30,7 +30,7 @@ def present_top_candidates_ui(original_text, clause_index, persona, style):
     summarizer = get_summarizer()
     candidates = []
     base_prompt = f"Rewrite the following {st.session_state.contract_type} clause for negotiation. Persona: {persona}. Style: {style}.\n\nClause:\n{original_text}"
-    for i in range(3):
+for i in range(1):  # Only generate 1 suggestion
         prompt = base_prompt + f"\n\nCandidate variation: {i+1}"
         try:
             out = summarizer(prompt, max_length=120, min_length=30, do_sample=True, top_k=50, top_p=0.95)
@@ -140,6 +140,13 @@ if st.sidebar.button("🔁 Clear Counters"):
     st.session_state.neg_counters = {}
     st.success("Cleared accepted counters.")
 
+    # clause analysis loop
+chunks = chunk_contract(st.session_state.negotiation_text)
+chunks = chunks[:20]
+...
+
+st.write(f"⏱️ Clause analysis took {time.time() - start:.2f} seconds")
+
 # ---------- Main UI ----------
 if st.session_state.negotiation_text:
     st.subheader("📜 Original Contract Text")
@@ -147,6 +154,7 @@ if st.session_state.negotiation_text:
 
     if st.button("🔍 Analyze Clauses"):
         chunks = chunk_contract(st.session_state.negotiation_text)
+        chunks = chunks[:20]  # Limit to first 20 clauses
         labeled = []
         for i, chunk in enumerate(chunks):
             clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
@@ -187,6 +195,10 @@ if st.session_state.labeled_chunks:
         if (risk_filter == "All" or c["risk"] == risk_filter)
         and (type_filter == "All" or c["type"] == type_filter)
     ]
+    for key in list(st.session_state.keys()):
+    if key.startswith("candidate_edit_") or key.startswith("learn_check_"):
+        del st.session_state[key]
+
 
     for i, clause in enumerate(filtered_clauses):
         with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
