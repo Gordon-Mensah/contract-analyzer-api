@@ -5,7 +5,8 @@ from sentence_transformers import SentenceTransformer
 
 @st.cache_resource
 def get_summarizer():
-    return pipeline("summarization", model="t5-small")
+    return pipeline("summarization", model="facebook/bart-large-cnn")
+
 
 @st.cache_resource
 def get_embedder():
