@@ -6,6 +6,8 @@ import sys, os
 sys.path.append(os.path.dirname(__file__))
 import time
 import matplotlib.pyplot as plt
+import warnings
+
 
 from core.config import CACHE_DIR
 from core.state import load_personas, save_session_state, load_session_state
@@ -140,11 +142,12 @@ if st.session_state.contract_loaded:
     st.subheader("📜 Original Contract Text")
     st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
 
-    if st.session_state.contract_loaded:
-        st.subheader("🧾 Contract Summary")
-        with st.spinner("Generating contract summary..."):
-            summary = summarize_contract(st.session_state.negotiation_text)
-        st.markdown(summary)
+if st.session_state.contract_loaded:
+    st.subheader("🧾 Contract Summary")
+    with st.spinner("Generating contract summary..."):
+        summary = summarize_contract(st.session_state.negotiation_text)
+    st.markdown(summary)
+
 
 
 if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):

@@ -2,6 +2,7 @@ import os
 import re
 from docx import Document
 import pdfplumber
+import warnings
 from core.clause_explanations import clause_type_explanations
 
 try:
@@ -200,12 +201,14 @@ def explain_clause_text(text):
 
 def summarize_contract(text):
     summarizer = get_summarizer()
-    short_text = text[:2000]  # Limit to first 2000 characters
+    short_text = text[:2000]  # Trim input to avoid overload
     try:
         out = summarizer(short_text, max_length=300, min_length=100, do_sample=False)
         return out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
     except Exception as e:
-        return f"⚠️ Unable to summarize contract. Error: {str(e)}"
+        warnings.warn(f"Summarization failed: {e}")
+        return "⚠️ Unable to summarize contract. Please review manually."
+
 
 
 
