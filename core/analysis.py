@@ -202,18 +202,21 @@ def explain_clause_text(text):
 # ---------- Summary Enhancements ----------
 def clean_summary(text):
     lines = text.split(". ")
+    filtered = [line for line in lines if "samaritans" not in line.lower() and "confidential support" not in line.lower()]
     seen = set()
     cleaned = []
-    for line in lines:
+    for line in filtered:
         line = line.strip()
         if line and line not in seen:
             cleaned.append(line)
             seen.add(line)
     return ". ".join(cleaned)
 
+
 def summarize_contract(text):
     summarizer = get_summarizer()
-    prompt = f"Summarize this contract:\n\n{text[:1000]}"
+    prompt = f"Extract and summarize the key terms of this contract in plain English:\n\n{text[:1000]}"
+
     try:
         out = summarizer(prompt, max_length=300, min_length=100, do_sample=False)
         raw_summary = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
