@@ -199,16 +199,25 @@ def explain_clause_text(text):
     else:
         return "This clause covers general terms and conditions related to the agreement."
 
+# ---------- Summary Enhancements ----------
+def clean_summary(text):
+    lines = text.split(". ")
+    seen = set()
+    cleaned = []
+    for line in lines:
+        line = line.strip()
+        if line and line not in seen:
+            cleaned.append(line)
+            seen.add(line)
+    return ". ".join(cleaned)
+
 def summarize_contract(text):
     summarizer = get_summarizer()
-    short_text = text[:2000]  # Trim input to avoid overload
+    prompt = f"Summarize the following contract in plain English:\n\n{text[:2000]}"
     try:
-        out = summarizer(short_text, max_length=300, min_length=100, do_sample=False)
-        return out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
+        out = summarizer(prompt, max_length=300, min_length=100, do_sample=False)
+        raw_summary = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
+        return clean_summary(raw_summary)
     except Exception as e:
         warnings.warn(f"Summarization failed: {e}")
         return "⚠️ Unable to summarize contract. Please review manually."
-
-
-
-
