@@ -140,10 +140,12 @@ if st.session_state.contract_loaded:
     st.subheader("📜 Original Contract Text")
     st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
 
-    st.subheader("🧾 Contract Summary")
-    with st.spinner("Generating contract summary..."):
-        summary = summarize_contract(st.session_state.negotiation_text[:2000])  # Limit input
-    st.markdown(summary)
+    if st.session_state.contract_loaded:
+        st.subheader("🧾 Contract Summary")
+        with st.spinner("Generating contract summary..."):
+            summary = summarize_contract(st.session_state.negotiation_text)
+        st.markdown(summary)
+
 
 if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
     start = time.time()

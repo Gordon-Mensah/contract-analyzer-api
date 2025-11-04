@@ -200,9 +200,12 @@ def explain_clause_text(text):
 
 def summarize_contract(text):
     summarizer = get_summarizer()
+    short_text = text[:2000]  # Limit to first 2000 characters
     try:
-        out = summarizer(text, max_length=300, min_length=100, do_sample=False)
+        out = summarizer(short_text, max_length=300, min_length=100, do_sample=False)
         return out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
-    except Exception:
-        return text[:500] + "..." if len(text) > 500 else text
+    except Exception as e:
+        return f"⚠️ Unable to summarize contract. Error: {str(e)}"
+
+
 
