@@ -123,6 +123,7 @@ try:
             except Exception as e:
                 st.error(f"Error fetching document: {e}")
 
+    explain_simple = st.sidebar.checkbox("🧒 Simplify explanations", value=False)
     learn_mode = st.sidebar.checkbox("🧠 Learn as You Go", value=True)
     summarize_enabled = st.sidebar.checkbox("Summarize clauses", value=True)
 
@@ -144,17 +145,14 @@ try:
         st.subheader("📜 Original Contract Text")
         st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
 
-        if st.session_state.contract_loaded:
-            st.subheader("🧾 Contract Summary")
-            with st.spinner("Generating contract summary..."):
-                try:
-                    summary = summarize_contract(st.session_state.negotiation_text)
-                    st.markdown(f"**Summary:**\n\n{summary}")
-                except Exception as e:
-                    st.error("🚨 Summary generation failed")
-                    st.text(traceback.format_exc())
-
-
+        st.subheader("🧾 Contract Summary")
+        with st.spinner("Generating contract summary..."):
+            try:
+                summary = summarize_contract(st.session_state.negotiation_text)
+                st.markdown(f"**Summary:**\n\n{summary}")
+            except Exception as e:
+                st.error("🚨 Summary generation failed")
+                st.text(traceback.format_exc())
 
     if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         start = time.time()
@@ -187,6 +185,16 @@ try:
         ax.set_ylabel("Number of Clauses")
         st.pyplot(fig)
 
+        # 📊 Contract Confidence Score
+        total = sum(risk_counts.values())
+        score = (
+            risk_counts["Low"] * 1 +
+            risk_counts["Medium"] * 0.5 +
+            risk_counts["High"] * 0
+        ) / max(total, 1)
+        confidence = "🔴 Low" if score < 0.4 else "🟠 Medium" if score < 0.7 else "🟢 High"
+        st.metric("📊 Contract Confidence Score", confidence)
+
     # ---------- Clause Review ----------
     if st.session_state.labeled_chunks:
         st.subheader("🧩 Clause Review")
@@ -214,6 +222,12 @@ try:
                 risk_note = explain_clause_risk(clause["text"], clause["type"], clause["risk"])
                 if risk_note:
                     st.markdown(f"**Why this clause matters:** {risk_note}")
+
+                # 🧒 Simplified explanation
+                if explain_simple:
+                    explanation = explain_clause_text(clause["text"])
+                    if explanation:
+                        st.info(f"🧾 **Simple Explanation:**\n\n{explanation}")
 
                 # Civilian-friendly suggestions
                 if clause["risk"] in ["High", "Medium"]:
