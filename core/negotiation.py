@@ -1,7 +1,6 @@
 # core/negotiation.py
 
 import datetime, time
-from core.ranking import embed_text
 import streamlit as st
 from core.models import get_summarizer
 from core.utils import mkhash
