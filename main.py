@@ -197,16 +197,16 @@ try:
             if key.startswith("candidate_edit_") or key.startswith("learn_check_"):
                 del st.session_state[key]
 
-                for i, clause in enumerate(filtered_clauses):
-                    with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
-                        st.markdown(highlight_risks(clause["text"]), unsafe_allow_html=True)
+        for i, clause in enumerate(filtered_clauses):
+            with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
+                st.markdown(highlight_risks(clause["text"]), unsafe_allow_html=True)
 
-                        if clause["summary"]:
-                            st.markdown(f"**Summary:** {clause['summary']}")
+                if clause["summary"]:
+                    st.markdown(f"**Summary:** {clause['summary']}")
 
-                        risk_note = explain_clause_risk(clause["text"], clause["type"], clause["risk"])
-                        if risk_note:
-                            st.markdown(f"**Why this clause matters:** {risk_note}")
+                risk_note = explain_clause_risk(clause["text"], clause["type"], clause["risk"])
+                if risk_note:
+                    st.markdown(f"**Why this clause matters:** {risk_note}")
 
                 # Civilian-friendly suggestions
                 if clause["risk"] in ["High", "Medium"]:
