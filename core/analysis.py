@@ -16,7 +16,7 @@ from functools import lru_cache
 
 @lru_cache(maxsize=1)
 def get_summarizer():
-    return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+    return pipeline("summarization", model="facebook/bart-large-cnn")
 
 # ---------- Clause Detection Maps ----------
 keyword_map = {
@@ -213,7 +213,7 @@ def clean_summary(text):
 
 def summarize_contract(text):
     summarizer = get_summarizer()
-    prompt = f"Summarize the following contract in plain English:\n\n{text[:2000]}"
+    prompt = f"Summarize this contract:\n\n{text[:1000]}"
     try:
         out = summarizer(prompt, max_length=300, min_length=100, do_sample=False)
         raw_summary = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")

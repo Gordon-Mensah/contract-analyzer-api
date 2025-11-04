@@ -144,10 +144,18 @@ try:
         st.subheader("📜 Original Contract Text")
         st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
 
-        st.subheader("🧾 Contract Summary")
-        with st.spinner("Generating contract summary..."):
-            summary = summarize_contract(st.session_state.negotiation_text)
-        st.markdown(f"**Summary:**\n\n{summary}")
+        if st.session_state.contract_loaded:
+            st.subheader("🧾 Contract Summary")
+            st.write("✅ Starting summarization")
+            with st.spinner("Generating contract summary..."):
+                try:
+                    summary = summarize_contract(st.session_state.negotiation_text)
+                    st.write("✅ Summary generated")
+                    st.markdown(f"**Summary:**\n\n{summary}")
+                except Exception as e:
+                    st.error("🚨 Summary generation failed")
+                    st.text(traceback.format_exc())
+
 
     if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         start = time.time()
