@@ -146,7 +146,8 @@ if st.session_state.contract_loaded:
     st.subheader("🧾 Contract Summary")
     with st.spinner("Generating contract summary..."):
         summary = summarize_contract(st.session_state.negotiation_text)
-    st.markdown(summary)
+    st.markdown(f"**Summary:**\n\n{summary}")
+
 
 
 
