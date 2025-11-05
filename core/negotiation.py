@@ -27,7 +27,9 @@ def summarize_clause(text):
     res = cache.get(key)
     if res is not None:
         return res
-    summarizer = get_summarizer()
+    @st.cache_resource
+    def get_summarizer_lazy():
+        return pipeline("summarization", model="philschmid/bart-large-cnn-samsum")
     try:
         out = summarizer(text, max_length=125, min_length=30, do_sample=False)
         s = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")

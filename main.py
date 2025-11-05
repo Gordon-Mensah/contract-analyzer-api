@@ -8,7 +8,8 @@ import time
 import matplotlib.pyplot as plt
 import warnings
 
-sys.path.append(os.path.dirname(__file__))
+sys.path.append("core")
+
 
 from core.config import CACHE_DIR
 from core.state import load_personas, save_session_state, load_session_state
@@ -165,7 +166,7 @@ try:
             st.error(f"🚨 Failed to chunk contract: {e}")
             chunks = []
 
-        chunks = chunks[:10000]
+        chunks = chunks[:1000]
         labeled = []
 
         st.write(f"🔍 Analyzing {len(chunks)} clauses...")
