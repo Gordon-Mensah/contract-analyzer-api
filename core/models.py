@@ -5,7 +5,7 @@ from sentence_transformers import SentenceTransformer
 
 @st.cache_resource
 def get_summarizer():
-    return pipeline("summarization", model="facebook/bart-large-cnn")
+    return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
 
 @st.cache_resource
