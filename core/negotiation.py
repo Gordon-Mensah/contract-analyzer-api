@@ -1,6 +1,7 @@
 # core/negotiation.py
 
 import datetime, time
+from core.ranking import embed_text
 import streamlit as st
 from core.models import get_summarizer
 from core.utils import mkhash
@@ -28,7 +29,7 @@ def summarize_clause(text):
         return res
     summarizer = get_summarizer()
     try:
-        out = summarizer(text, max_length=60, min_length=20, do_sample=False)
+        out = summarizer(text, max_length=125, min_length=30, do_sample=False)
         s = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
     except Exception:
         s = text[:200] + "..." if len(text) > 200 else text
