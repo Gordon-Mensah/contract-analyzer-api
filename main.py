@@ -102,6 +102,9 @@ try:
         uploaded_file = st.file_uploader("Choose a contract file", type=["pdf", "docx", "txt"])
         if uploaded_file:
             text = load_contract(uploaded_file)
+            if not text or not isinstance(text, str):
+                st.error("🚨 Loaded contract is empty or invalid.")
+                st.stop()
             st.session_state.negotiation_text = text
             st.session_state.contract_loaded = True
 
@@ -156,16 +159,66 @@ try:
 
     if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         start = time.time()
-        chunks = chunk_contract(st.session_state.negotiation_text)
+        try:
+            chunks = chunk_contract(st.session_state.negotiation_text)
+        except Exception as e:
+            st.error(f"🚨 Failed to chunk contract: {e}")
+            chunks = []
+
         chunks = chunks[:10000]
         labeled = []
+
+        st.write(f"🔍 Analyzing {len(chunks)} clauses...")
+
         for i, chunk in enumerate(chunks):
-            clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
             try:
+                clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
                 summary = summarize_clause(chunk) if summarize_enabled else ""
             except Exception as e:
-                summary = ""
-                st.warning(f"⚠️ Could not summarize clause {i+1}: {e}")
+                clause_type, risk_level, summary = "Unknown", "Medium", ""
+                st.warning(f"⚠️ Error analyzing clause {i+1}: {e}")
+                st.write(f"Clause {i+1}: {chunk[:100]}...")
+
+            labeled.append({
+                "id": i,
+                "text": chunk,
+                "type": clause_type,
+                "risk": risk_level,
+                "summary": summary,
+                "translated": ""
+            })
+
+        st.session_state.labeled_chunks = labeled
+        st.success(f"{len(labeled)} clauses analyzed.")
+        st.write(f"⏱️ Clause analysis took {time.time() - start:.2f} seconds")
+
+        risk_counts = {"High": 0, "Medium": 0, "Low": 0}
+        for c in labeled:
+            if c["risk"] in risk_counts:
+                risk_counts[c["risk"]] += 1
+
+        fig, ax = plt.subplots()
+        ax.bar(risk_counts.keys(), risk_counts.values(), color=["red", "orange", "green"])
+        ax.set_title("Clause Risk Summary")
+        ax.set_ylabel("Number of Clauses")
+        st.pyplot(fig)
+
+        total = sum(risk_counts.values())
+        score = (
+            risk_counts["Low"] * 1 +
+            risk_counts["Medium"] * 0.5 +
+            risk_counts["High"] * 0
+        ) / max(total, 1)
+        confidence = "🔴 Low" if score < 0.4 else "🟠 Medium" if score < 0.7 else "🟢 High"
+        st.metric("📊 Contract Confidence Score", confidence)
+
+        try:
+            clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
+            summary = summarize_clause(chunk) if summarize_enabled else ""
+        except Exception as e:
+            clause_type, risk_level, summary = "Unknown", "Medium", ""
+            st.warning(f"⚠️ Error analyzing clause {i+1}: {e}")
+            st.write(f"Clause {i+1}: {chunk[:100]}...")
 
             labeled.append({
                 "id": i,
