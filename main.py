@@ -215,7 +215,12 @@ try:
 
         try:
             clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
-            summary = summarize_clause(chunk) if summarize_enabled else ""
+            try:
+                summary = summarize_clause(chunk) if summarize_enabled else ""
+            except Exception as e:
+                summary = ""
+                st.warning(f"⚠️ Could not summarize clause {i+1}: {e}")
+
         except Exception as e:
             clause_type, risk_level, summary = "Unknown", "Medium", ""
             st.warning(f"⚠️ Error analyzing clause {i+1}: {e}")
