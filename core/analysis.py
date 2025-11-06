@@ -16,7 +16,8 @@ from functools import lru_cache
 
 @lru_cache(maxsize=1)
 def get_summarizer():
-    return pipeline("summarization", model="facebook/bart-large-cnn")
+    return pipeline("summarization", model="philschmid/bart-large-cnn-samsum")
+
 
 # ---------- Clause Detection Maps ----------
 keyword_map = {
