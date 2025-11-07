@@ -197,6 +197,13 @@ st.markdown("**Top Clauses to Review:**")
 for c in top_clauses:
     st.markdown(f"- Clause {c['id']+1} — {c['type']} — {c['risk']} Risk")
 
+st.download_button(
+    label="📥 Download Risk Report",
+    data=report_text,
+    file_name="contract_risk_report.txt",
+    mime="text/plain"
+)
+
     # ---------- Clause Review ----------
 if st.session_state.labeled_chunks:
         st.subheader("🧩 Clause Review")
