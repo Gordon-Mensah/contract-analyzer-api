@@ -33,7 +33,7 @@ st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout=
 st.title("📄 Smart Contract Assistant")
 st.markdown("Choose the type of contract you're working with:")
 
-    contract_types = {
+contract_types = {
         "employment": "💼 Employment",
         "rental": "🏠 Rental/Lease",
         "nda": "🔒 Non-Disclosure (NDA)",
@@ -42,17 +42,17 @@ st.markdown("Choose the type of contract you're working with:")
         "other": "📁 Other"
     }
 
-    selected_type = st.selectbox("Contract Type", list(contract_types.values()))
-    st.session_state.contract_type = [k for k, v in contract_types.items() if v == selected_type][0]
+selected_type = st.selectbox("Contract Type", list(contract_types.values()))
+st.session_state.contract_type = [k for k, v in contract_types.items() if v == selected_type][0]
 
-    if st.button("📄 Load Sample Contract"):
+if st.button("📄 Load Sample Contract"):
         sample_text = get_sample_contract(st.session_state.contract_type)
         st.session_state.negotiation_text = sample_text
         st.session_state.contract_loaded = True
         st.success(f"Sample {contract_types[st.session_state.contract_type]} contract loaded.")
 
     # ---------- Session defaults ----------
-    _defaults = {
+_defaults = {
         "neg_personas": {},
         "neg_counters": {},
         "neg_simulated": {},
@@ -62,16 +62,16 @@ st.markdown("Choose the type of contract you're working with:")
         "saved_personas": load_personas(),
         "contract_loaded": False,
     }
-    for k, v in _defaults.items():
+for k, v in _defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
-    load_session_state()
+load_session_state()
 
     # ---------- Sidebar ----------
-    st.sidebar.title("📄 Contract Intelligence")
-    st.sidebar.markdown("Build smarter contracts with zero budget")
+st.sidebar.title("📄 Contract Intelligence")
+st.sidebar.markdown("Build smarter contracts with zero budget")
 
-    with st.sidebar.expander("📁 Upload Contract"):
+with st.sidebar.expander("📁 Upload Contract"):
         uploaded_file = st.file_uploader("Choose a contract file", type=["pdf", "docx", "txt"])
         if uploaded_file:
             text = load_contract(uploaded_file)
@@ -81,7 +81,7 @@ st.markdown("Choose the type of contract you're working with:")
             st.session_state.negotiation_text = text
             st.session_state.contract_loaded = True
 
-    with st.sidebar.expander("🌐 Import from Link"):
+with st.sidebar.expander("🌐 Import from Link"):
         contract_url = st.text_input("Paste contract URL (PDF, DOCX, or TXT)")
         if contract_url:
             try:
@@ -99,22 +99,22 @@ st.markdown("Choose the type of contract you're working with:")
             except Exception as e:
                 st.error(f"Error fetching document: {e}")
 
-    explain_simple = st.sidebar.checkbox("🧒 Simplify explanations", value=False)
-    learn_mode = st.sidebar.checkbox("🧠 Learn as You Go", value=True)
+explain_simple = st.sidebar.checkbox("🧒 Simplify explanations", value=False)
+learn_mode = st.sidebar.checkbox("🧠 Learn as You Go", value=True)
 
  
-    with st.sidebar.expander("🧠 Persona Settings"):
+with st.sidebar.expander("🧠 Persona Settings"):
         persona = st.text_input("Persona name", value=st.session_state.neg_personas.get("default", {}).get("persona", "Startup Founder"))
         style = st.selectbox("Rewrite style", ["Plain English", "Legalese", "Assertive", "Concise", "Friendly"])
         st.session_state.neg_personas["default"] = {"persona": persona, "style": style}
 
-    if st.sidebar.button("💾 Save Session"):
-        save_session_state()
-    if st.sidebar.button("📂 Load Session"):
-        load_session_state()
-    if st.sidebar.button("🔁 Clear Counters"):
-        st.session_state.neg_counters = {}
-        st.success("Cleared accepted counters.")
+if st.sidebar.button("💾 Save Session"):
+    save_session_state()
+if st.sidebar.button("📂 Load Session"):
+    load_session_state()
+if st.sidebar.button("🔁 Clear Counters"):
+    st.session_state.neg_counters = {}
+    st.success("Cleared accepted counters.")
 
     # ---------- Main UI ----------
     if st.session_state.contract_loaded:
@@ -256,9 +256,3 @@ st.markdown("Choose the type of contract you're working with:")
                             st.info(f"🧾 **What this clause means in simple terms:**\n\n{explanation}")
                         else:
                             st.warning("⚠️ Sorry, I couldn't simplify this clause at the moment.")
-
-                
-
-except Exception as e:
-    st.error("🚨 App crashed during startup")
-    st.text(traceback.format_exc())
