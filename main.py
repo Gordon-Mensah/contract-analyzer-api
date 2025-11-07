@@ -6,8 +6,6 @@ import sys, os
 import traceback
 import time
 import matplotlib.pyplot as plt
-import warnings
-
 sys.path.append("core")
 
 
@@ -23,7 +21,6 @@ from core.analysis import (
       )
 
 from core.utils import highlight_risks, format_badges
-from core.export import inline_word_diff_html
 from core.samples import get_sample_contract
 
 st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout="wide")
