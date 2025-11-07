@@ -166,40 +166,40 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         confidence = "🔴 Low" if score < 0.4 else "🟠 Medium" if score < 0.7 else "🟢 High"
         st.metric("📊 Contract Confidence Score", confidence)
 
-# ---------- Risk Report ----------
-report_lines = []
-report_lines.append(f"📄 Contract Risk Report")
-report_lines.append(f"Contract Type: {contract_types[st.session_state.contract_type]}")
-report_lines.append(f"Total Clauses Analyzed: {len(labeled)}")
-report_lines.append(f"Risk Breakdown:")
-report_lines.append(f"- High Risk: {risk_counts['High']}")
-report_lines.append(f"- Medium Risk: {risk_counts['Medium']}")
-report_lines.append(f"- Low Risk: {risk_counts['Low']}")
+        # ---------- Risk Report ----------
+        report_lines = []
+        report_lines.append(f"📄 Contract Risk Report")
+        report_lines.append(f"Contract Type: {contract_types[st.session_state.contract_type]}")
+        report_lines.append(f"Total Clauses Analyzed: {len(labeled)}")
+        report_lines.append(f"Risk Breakdown:")
+        report_lines.append(f"- High Risk: {risk_counts['High']}")
+        report_lines.append(f"- Medium Risk: {risk_counts['Medium']}")
+        report_lines.append(f"- Low Risk: {risk_counts['Low']}")
 
-common_types = {}
-for c in labeled:
-    t = c["type"]
-    if t not in common_types:
-        common_types[t] = 0
-    common_types[t] += 1
+        common_types = {}
+        for c in labeled:
+            t = c["type"]
+            if t not in common_types:
+                common_types[t] = 0
+            common_types[t] += 1
 
-top_types = sorted(common_types.items(), key=lambda x: x[1], reverse=True)[:3]
-report_lines.append("Most Common Clause Types: " + ", ".join(t[0] for t in top_types))
-report_lines.append(f"Overall Confidence Score: {confidence}")
+        top_types = sorted(common_types.items(), key=lambda x: x[1], reverse=True)[:3]
+        report_lines.append("Most Common Clause Types: " + ", ".join(t[0] for t in top_types))
+        report_lines.append(f"Overall Confidence Score: {confidence}")
 
-top_clauses = [c for c in labeled if c["risk"] in ["High", "Medium"]][:5]
-report_lines.append("Top Clauses to Review:")
-for c in top_clauses:
-    report_lines.append(f"- Clause {c['id']+1} — {c['type']} — {c['risk']} Risk")
+        top_clauses = [c for c in labeled if c["risk"] in ["High", "Medium"]][:5]
+        report_lines.append("Top Clauses to Review:")
+        for c in top_clauses:
+            report_lines.append(f"- Clause {c['id']+1} — {c['type']} — {c['risk']} Risk")
 
-report_text = "\n".join(report_lines)
+        report_text = "\n".join(report_lines)
 
-st.download_button(
-    label="📥 Download Risk Report",
-    data=report_text,
-    file_name="contract_risk_report.txt",
-    mime="text/plain"
-)
+        st.download_button(
+            label="📥 Download Risk Report",
+            data=report_text,
+            file_name="contract_risk_report.txt",
+            mime="text/plain"
+        )
 
 
     # ---------- Clause Review ----------
