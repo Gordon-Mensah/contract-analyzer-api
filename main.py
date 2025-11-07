@@ -122,26 +122,25 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
 
         for i, chunk in enumerate(chunks[:100]):
             clause_type, risk_level, summary = "Unknown", "Medium", ""
-        try:
-            if not chunk or not isinstance(chunk, str):
-                raise ValueError("Empty or invalid clause text")
+            st.write(f"🔍 Clause {i+1} starting...")
 
-            clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
-            summary = ""  # Skipped for lightweight mode
+            try:
+                if not chunk or not isinstance(chunk, str):
+                    raise ValueError("Empty or invalid clause text")
 
-        except Exception as e:
-            st.warning(f"⚠️ Error analyzing clause {i+1}: {e}")
-            st.text(traceback.format_exc())
+                st.write(f"Clause {i+1} text: {chunk[:100]}...")
+
+                clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
+                st.write(f"Clause {i+1} labeled as {clause_type} with risk {risk_level}")
+
+                summary = ""  # Skipped for lightweight mode
 
 
-            summary = ""  # Skipped for lightweight mode
-
-
-        except Exception as e:
+            except Exception as e:
                 st.warning(f"⚠️ Error analyzing clause {i+1}: {e}")
                 st.text(traceback.format_exc())
 
-        labeled.append({
+            labeled.append({
                 "id": i,
                 "text": chunk,
                 "type": clause_type,
