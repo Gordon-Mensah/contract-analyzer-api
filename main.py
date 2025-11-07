@@ -21,45 +21,17 @@ from core.analysis import (
     get_clause_explanation,
     explain_clause_text,
     summarize_contract
-)
-from core.models import get_summarizer
+      )
+
 from core.utils import highlight_risks, format_badges
-from core.negotiation import summarize_clause, add_turn
 from core.export import inline_word_diff_html
 from core.samples import get_sample_contract
 
 st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout="wide")
 
-try:
-    # ---------- Candidate presentation helper ----------
-    def present_top_candidates_ui(original_text, clause_index, persona, style):
-        st.markdown("### ✨ Suggested Counter-Proposal")
-        summarizer = get_summarizer()
-        base_prompt = f"Rewrite the following {st.session_state.contract_type} clause for negotiation. Persona: {persona}. Style: {style}.\n\nClause:\n{original_text}"
-        try:
-            out = summarizer(base_prompt, max_length=120, min_length=30, do_sample=True, top_k=50, top_p=0.95)
-            text = out[0]["summary_text"].strip() if isinstance(out, list) else out.get("summary_text", "").strip()
-        except Exception:
-            text = original_text[:200] + "..."
-
-        st.markdown("#### #1")
-        diff_display = inline_word_diff_html(original_text, text)
-        st.markdown(diff_display, unsafe_allow_html=True)
-
-        col_a, col_b = st.columns([3, 1])
-        with col_a:
-            new_text = st.text_area(f"Edit Candidate {clause_index}_1", value=text, key=f"candidate_edit_{clause_index}_1", height=120)
-        with col_b:
-            if st.button(f"✅ Accept #1", key=f"accept_{clause_index}_1"):
-                if "labeled_chunks" in st.session_state and 0 <= clause_index < len(st.session_state.labeled_chunks):
-                    st.session_state.labeled_chunks[clause_index]["text"] = new_text
-                    st.session_state.neg_counters[f"counter_{clause_index}"] = new_text
-                    add_turn("you", new_text, persona, "accepted_offer")
-                    st.success(f"Accepted candidate #1 for Clause {clause_index + 1}")
-
     # ---------- Contract Type Selection ----------
-    st.title("📄 Smart Contract Assistant")
-    st.markdown("Choose the type of contract you're working with:")
+st.title("📄 Smart Contract Assistant")
+st.markdown("Choose the type of contract you're working with:")
 
     contract_types = {
         "employment": "💼 Employment",
@@ -129,8 +101,8 @@ try:
 
     explain_simple = st.sidebar.checkbox("🧒 Simplify explanations", value=False)
     learn_mode = st.sidebar.checkbox("🧠 Learn as You Go", value=True)
-    summarize_enabled = st.sidebar.checkbox("Summarize clauses", value=True)
 
+ 
     with st.sidebar.expander("🧠 Persona Settings"):
         persona = st.text_input("Persona name", value=st.session_state.neg_personas.get("default", {}).get("persona", "Startup Founder"))
         style = st.selectbox("Rewrite style", ["Plain English", "Legalese", "Assertive", "Concise", "Friendly"])
@@ -148,17 +120,6 @@ try:
     if st.session_state.contract_loaded:
         st.subheader("📜 Original Contract Text")
         st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
-
-        st.write("🧠 Starting contract summarization...")
-
-        st.subheader("🧾 Contract Summary")
-        with st.spinner("Generating contract summary..."):
-            try:
-                summary = summarize_contract(st.session_state.negotiation_text)
-                st.markdown(f"**Summary:**\n\n{summary}")
-            except Exception as e:
-                st.error("🚨 Summary generation failed")
-                st.text(traceback.format_exc())
 
     if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         start = time.time()
@@ -186,14 +147,8 @@ try:
                 clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
                 st.write(f"Clause {i+1} labeled as {clause_type} with risk {risk_level}")
 
-                if summarize_enabled:
-                    try:
-                        summary = summarize_clause(chunk)
-                        st.write(f"Clause {i+1} summary: {summary[:100]}...")
-                    except Exception as e:
-                        summary = ""
-                        st.warning(f"⚠️ Could not summarize clause {i+1}: {e}")
-                        st.text(traceback.format_exc())
+                summary = ""  # Skipped for lightweight mode
+
 
             except Exception as e:
                 st.warning(f"⚠️ Error analyzing clause {i+1}: {e}")
@@ -302,7 +257,7 @@ try:
                         else:
                             st.warning("⚠️ Sorry, I couldn't simplify this clause at the moment.")
 
-                present_top_candidates_ui(clause["text"], clause["id"], persona, style)
+                
 
 except Exception as e:
     st.error("🚨 App crashed during startup")
