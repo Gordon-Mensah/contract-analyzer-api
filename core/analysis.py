@@ -12,87 +12,47 @@ except Exception:
     _HAS_LANGCHAIN_SPLITTER = False
 
 from transformers import pipeline
-from functools import lru_cache
 
-@lru_cache(maxsize=1)
-def get_summarizer():
-    return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-
-
+# ---------- Preload Summarizer Globally ----------
+try:
+    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+except Exception as e:
+    summarizer = None
+    print(f"❌ Failed to load summarizer: {e}")
 
 # ---------- Clause Detection Maps ----------
 keyword_map = {
     "nda": {
-        "Confidentiality": [
-            "confidential", "non-disclosure", "secret", "proprietary", "private", "classified", "sensitive", "internal"
-        ],
-        "Restrictions": [
-            "reverse engineer", "copy", "replicate", "duplicate", "unauthorized", "prohibit", "ban", "limit", "restrict"
-        ],
-        "Termination": [
-            "terminate", "end", "cancel", "conclude", "expire", "cease", "withdraw", "revoke"
-        ]
+        "Confidentiality": ["confidential", "non-disclosure", "secret", "proprietary", "private", "classified", "sensitive", "internal"],
+        "Restrictions": ["reverse engineer", "copy", "replicate", "duplicate", "unauthorized", "prohibit", "ban", "limit", "restrict"],
+        "Termination": ["terminate", "end", "cancel", "conclude", "expire", "cease", "withdraw", "revoke"]
     },
     "rental": {
-        "Payment": [
-            "rent", "deposit", "fee", "dues", "installment", "charge", "billing", "cost"
-        ],
-        "Termination": [
-            "eviction", "terminate", "notice", "vacate", "end lease", "cancel", "quit", "release"
-        ],
-        "Maintenance": [
-            "repair", "damage", "cleaning", "upkeep", "fix", "restore", "service", "maintain"
-        ],
-        "Liability": [
-            "insurance", "liability", "damages", "responsibility", "accountable", "fault", "risk", "cover"
-        ]
+        "Payment": ["rent", "deposit", "fee", "dues", "installment", "charge", "billing", "cost"],
+        "Termination": ["eviction", "terminate", "notice", "vacate", "end lease", "cancel", "quit", "release"],
+        "Maintenance": ["repair", "damage", "cleaning", "upkeep", "fix", "restore", "service", "maintain"],
+        "Liability": ["insurance", "liability", "damages", "responsibility", "accountable", "fault", "risk", "cover"]
     },
     "employment": {
-        "Duties": [
-            "responsibilities", "tasks", "role", "reporting", "obligations", "functions", "assignments"
-        ],
-        "Compensation": [
-            "salary", "bonus", "benefits", "pay", "wages", "income", "remuneration", "package"
-        ],
-        "Termination": [
-            "resignation", "dismissal", "notice", "severance", "layoff", "exit", "release"
-        ],
-        "IP": [
-            "intellectual property", "invention", "ownership", "patent", "copyright", "trademark", "creation"
-        ]
+        "Duties": ["responsibilities", "tasks", "role", "reporting", "obligations", "functions", "assignments"],
+        "Compensation": ["salary", "bonus", "benefits", "pay", "wages", "income", "remuneration", "package"],
+        "Termination": ["resignation", "dismissal", "notice", "severance", "layoff", "exit", "release"],
+        "IP": ["intellectual property", "invention", "ownership", "patent", "copyright", "trademark", "creation"]
     },
     "service": {
-        "Scope": [
-            "services", "deliverables", "timeline", "schedule", "coverage", "extent", "range", "tasks"
-        ],
-        "Payment": [
-            "fee", "invoice", "payment terms", "cost", "charge", "rate", "billing"
-        ],
-        "Termination": [
-            "cancel", "terminate", "breach", "end", "revoke", "discontinue", "cease"
-        ],
-        "Liability": [
-            "indemnify", "damages", "limitation", "responsibility", "risk", "cover", "accountability"
-        ]
+        "Scope": ["services", "deliverables", "timeline", "schedule", "coverage", "extent", "range", "tasks"],
+        "Payment": ["fee", "invoice", "payment terms", "cost", "charge", "rate", "billing"],
+        "Termination": ["cancel", "terminate", "breach", "end", "revoke", "discontinue", "cease"],
+        "Liability": ["indemnify", "damages", "limitation", "responsibility", "risk", "cover", "accountability"]
     },
     "sales": {
-        "Price": [
-            "price", "cost", "payment", "rate", "charge", "amount", "value"
-        ],
-        "Delivery": [
-            "shipment", "delivery", "timeline", "dispatch", "send", "transport", "arrival"
-        ],
-        "Warranty": [
-            "warranty", "guarantee", "defect", "assurance", "coverage", "promise", "quality"
-        ],
-        "Returns": [
-            "refund", "return", "exchange", "credit", "replacement", "cancel", "reverse"
-        ]
+        "Price": ["price", "cost", "payment", "rate", "charge", "amount", "value"],
+        "Delivery": ["shipment", "delivery", "timeline", "dispatch", "send", "transport", "arrival"],
+        "Warranty": ["warranty", "guarantee", "defect", "assurance", "coverage", "promise", "quality"],
+        "Returns": ["refund", "return", "exchange", "credit", "replacement", "cancel", "reverse"]
     },
     "other": {
-        "General": [
-            "agreement", "party", "terms", "conditions", "contract", "deal", "understanding"
-        ]
+        "General": ["agreement", "party", "terms", "conditions", "contract", "deal", "understanding"]
     }
 }
 
@@ -214,14 +174,9 @@ def clean_summary(text):
             seen.add(line)
     return ". ".join(cleaned)
 
-
 def summarize_contract(text):
-    try:
-        print("Loading summarizer...")
-        summarizer = get_summarizer()
-    except Exception as e:
-        print(f"❌ Failed to load summarizer: {e}")
-        return "⚠️ Summarizer could not be loaded. Please review the contract manually."
+    if summarizer is None:
+        return "⚠️ Summarizer could not be loaded. Please review manually."
 
     try:
         input_text = text[:800]
@@ -235,4 +190,3 @@ def summarize_contract(text):
     except Exception as e:
         print(f"❌ Summarization failed: {e}")
         return "⚠️ Unable to summarize contract. Please review manually."
-
