@@ -23,20 +23,19 @@ def add_turn(author, text, persona, role):
     })
 
 def summarize_clause(text):
-    key = "summarize:" + mkhash(text)
-    res = cache.get(key)
-    if res is not None:
-        return res
-    @st.cache_resource
-    def get_summarizer_lazy():
-        return pipeline("summarization", model="philschmid/bart-large-cnn-samsum")
+    summarizer = get_summarizer()
+    if summarizer is None:
+        return "⚠️ Summarizer not available."
+
     try:
-        out = summarizer(text, max_length=125, min_length=30, do_sample=False)
-        s = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
-    except Exception:
-        s = text[:200] + "..." if len(text) > 200 else text
-    cache.set(key, s, expire=24 * 3600)
-    return s
+        input_text = text[:800]
+        prompt = f"Summarize this clause in plain English:\n\n{input_text}"
+        out = summarizer(prompt, max_length=120, min_length=30, do_sample=False)
+        return out[0]["summary_text"].strip() if isinstance(out, list) else out.get("summary_text", "").strip()
+    except Exception as e:
+        print(f"❌ Clause summarization failed: {e}")
+        return "⚠️ Unable to summarize this clause."
+
 
 def auto_negotiate_simulation(clause_text, persona, turns=3, stop_threshold=0.9, pause=0.5):
     history = []
