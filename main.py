@@ -128,11 +128,6 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
                 if not chunk or not isinstance(chunk, str):
                     raise ValueError("Empty or invalid clause text")
 
-                st.write(f"Clause {i+1} text: {chunk[:100]}...")
-
-                clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
-                st.write(f"Clause {i+1} labeled as {clause_type} with risk {risk_level}")
-
                 summary = ""  # Skipped for lightweight mode
 
 
