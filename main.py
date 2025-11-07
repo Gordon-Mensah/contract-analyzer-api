@@ -204,6 +204,7 @@ st.download_button(
     mime="text/plain"
 )
 
+
     # ---------- Clause Review ----------
 if st.session_state.labeled_chunks:
         st.subheader("🧩 Clause Review")
