@@ -16,7 +16,8 @@ from functools import lru_cache
 
 @lru_cache(maxsize=1)
 def get_summarizer():
-    return pipeline("summarization", model="philschmid/bart-large-cnn-samsum")
+    return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+
 
 
 # ---------- Clause Detection Maps ----------
@@ -216,12 +217,18 @@ def clean_summary(text):
 
 def summarize_contract(text):
     summarizer = get_summarizer()
-    prompt = f"Extract and summarize the key terms of this contract in plain English:\n\n{text[:1000]}"
-
     try:
-        out = summarizer(prompt, max_length=300, min_length=100, do_sample=False)
+        # Truncate input to avoid overload
+        input_text = text[:800]
+        prompt = f"Extract and summarize the key terms of this contract in plain English:\n\n{input_text}"
+
+        print(f"Summarizing {len(input_text)} characters...")
+        out = summarizer(prompt, max_length=200, min_length=50, do_sample=False)
+
         raw_summary = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
         return clean_summary(raw_summary)
+
     except Exception as e:
-        warnings.warn(f"Summarization failed: {e}")
+        print(f"Summarization failed: {e}")
         return "⚠️ Unable to summarize contract. Please review manually."
+
