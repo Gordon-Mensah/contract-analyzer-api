@@ -149,6 +149,8 @@ try:
         st.subheader("📜 Original Contract Text")
         st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
 
+        st.write("🧠 Starting contract summarization...")
+
         st.subheader("🧾 Contract Summary")
         with st.spinner("Generating contract summary..."):
             try:
