@@ -11,14 +11,7 @@ try:
 except Exception:
     _HAS_LANGCHAIN_SPLITTER = False
 
-from transformers import pipeline
 
-# ---------- Preload Summarizer Globally ----------
-try:
-    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-except Exception as e:
-    summarizer = None
-    print(f"❌ Failed to load summarizer: {e}")
 
 # ---------- Clause Detection Maps ----------
 keyword_map = {
@@ -160,33 +153,3 @@ def explain_clause_text(text):
         return "This clause defines who is responsible if something goes wrong."
     else:
         return "This clause covers general terms and conditions related to the agreement."
-
-# ---------- Summary Enhancements ----------
-def clean_summary(text):
-    lines = text.split(". ")
-    filtered = [line for line in lines if "samaritans" not in line.lower() and "confidential support" not in line.lower()]
-    seen = set()
-    cleaned = []
-    for line in filtered:
-        line = line.strip()
-        if line and line not in seen:
-            cleaned.append(line)
-            seen.add(line)
-    return ". ".join(cleaned)
-
-def summarize_contract(text):
-    if summarizer is None:
-        return "⚠️ Summarizer could not be loaded. Please review manually."
-
-    try:
-        input_text = text[:800]
-        prompt = f"Extract and summarize the key terms of this contract in plain English:\n\n{input_text}"
-        print(f"🧠 Summarizing {len(input_text)} characters...")
-
-        out = summarizer(prompt, max_length=200, min_length=50, do_sample=False)
-        raw_summary = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
-        return clean_summary(raw_summary)
-
-    except Exception as e:
-        print(f"❌ Summarization failed: {e}")
-        return "⚠️ Unable to summarize contract. Please review manually."
