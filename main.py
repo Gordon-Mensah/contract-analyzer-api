@@ -168,17 +168,27 @@ try:
             st.error(f"🚨 Failed to chunk contract: {e}")
             chunks = []
 
-        chunks = chunks[:300]
+        chunks = chunks[:100]
         labeled = []
 
         st.write(f"🔍 Analyzing {len(chunks)} clauses...")
 
         for i, chunk in enumerate(chunks):
+            clause_type, risk_level, summary = "Unknown", "Medium", ""
             try:
+                if not chunk or not isinstance(chunk, str):
+                    raise ValueError("Empty or invalid clause text")
+
                 clause_type, risk_level = label_clause(chunk, st.session_state.contract_type)
-                summary = summarize_clause(chunk) if summarize_enabled else ""
+
+                if summarize_enabled:
+                    try:
+                        summary = summarize_clause(chunk)
+                    except Exception as e:
+                        summary = ""
+                        st.warning(f"⚠️ Could not summarize clause {i+1}: {e}")
+
             except Exception as e:
-                clause_type, risk_level, summary = "Unknown", "Medium", ""
                 st.warning(f"⚠️ Error analyzing clause {i+1}: {e}")
                 st.write(f"Clause {i+1}: {chunk[:100]}...")
 
@@ -190,6 +200,7 @@ try:
                 "summary": summary,
                 "translated": ""
             })
+
 
         st.session_state.labeled_chunks = labeled
         st.success(f"{len(labeled)} clauses analyzed.")
