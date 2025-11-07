@@ -19,8 +19,7 @@ from core.analysis import (
     label_clause,
     explain_clause_risk,
     get_clause_explanation,
-    explain_clause_text,
-    summarize_contract
+    explain_clause_text
       )
 
 from core.utils import highlight_risks, format_badges
@@ -108,20 +107,12 @@ with st.sidebar.expander("🧠 Persona Settings"):
         style = st.selectbox("Rewrite style", ["Plain English", "Legalese", "Assertive", "Concise", "Friendly"])
         st.session_state.neg_personas["default"] = {"persona": persona, "style": style}
 
-if st.sidebar.button("💾 Save Session"):
-    save_session_state()
-if st.sidebar.button("📂 Load Session"):
-    load_session_state()
-if st.sidebar.button("🔁 Clear Counters"):
-    st.session_state.neg_counters = {}
-    st.success("Cleared accepted counters.")
-
     # ---------- Main UI ----------
-    if st.session_state.contract_loaded:
+if st.session_state.contract_loaded:
         st.subheader("📜 Original Contract Text")
         st.text_area("Contract", value=st.session_state.negotiation_text, height=200)
 
-    if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
+if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         start = time.time()
         try:
             chunks = chunk_contract(st.session_state.negotiation_text)
@@ -192,7 +183,7 @@ if st.sidebar.button("🔁 Clear Counters"):
 
 
     # ---------- Clause Review ----------
-    if st.session_state.labeled_chunks:
+if st.session_state.labeled_chunks:
         st.subheader("🧩 Clause Review")
 
         risk_filter = st.selectbox("Filter by Risk Level", ["All", "High", "Medium", "Low"])
