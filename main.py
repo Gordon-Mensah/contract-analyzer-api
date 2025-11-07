@@ -169,6 +169,33 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         confidence = "🔴 Low" if score < 0.4 else "🟠 Medium" if score < 0.7 else "🟢 High"
         st.metric("📊 Contract Confidence Score", confidence)
 
+# ---------- Risk Report ----------
+st.subheader("📄 Contract Risk Report")
+
+st.markdown(f"**Contract Type:** {contract_types[st.session_state.contract_type]}")
+st.markdown(f"**Total Clauses Analyzed:** {len(labeled)}")
+
+st.markdown("**Risk Breakdown:**")
+st.markdown(f"- High Risk: {risk_counts['High']}")
+st.markdown(f"- Medium Risk: {risk_counts['Medium']}")
+st.markdown(f"- Low Risk: {risk_counts['Low']}")
+
+common_types = {}
+for c in labeled:
+    t = c["type"]
+    if t not in common_types:
+        common_types[t] = 0
+    common_types[t] += 1
+
+top_types = sorted(common_types.items(), key=lambda x: x[1], reverse=True)[:3]
+st.markdown("**Most Common Clause Types:** " + ", ".join(t[0] for t in top_types))
+
+st.markdown(f"**Overall Confidence Score:** {confidence}")
+
+top_clauses = [c for c in labeled if c["risk"] in ["High", "Medium"]][:5]
+st.markdown("**Top Clauses to Review:**")
+for c in top_clauses:
+    st.markdown(f"- Clause {c['id']+1} — {c['type']} — {c['risk']} Risk")
 
     # ---------- Clause Review ----------
 if st.session_state.labeled_chunks:
