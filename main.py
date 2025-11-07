@@ -168,7 +168,7 @@ try:
             st.error(f"🚨 Failed to chunk contract: {e}")
             chunks = []
 
-        chunks = chunks[:100]
+        chunks = chunks[:300]
         labeled = []
 
         st.write(f"🔍 Analyzing {len(chunks)} clauses...")
