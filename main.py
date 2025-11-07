@@ -173,7 +173,7 @@ try:
 
         st.write(f"🔍 Analyzing {len(chunks)} clauses...")
 
-        for i, chunk in enumerate(chunks):
+        for i, chunk in enumerate(chunks[:100]):  # Limit to 100 clauses max
             clause_type, risk_level, summary = "Unknown", "Medium", ""
             try:
                 if not chunk or not isinstance(chunk, str):
@@ -187,9 +187,11 @@ try:
                     except Exception as e:
                         summary = ""
                         st.warning(f"⚠️ Could not summarize clause {i+1}: {e}")
+                        st.text(f"Clause {i+1} summary error: {e}")
 
             except Exception as e:
                 st.warning(f"⚠️ Error analyzing clause {i+1}: {e}")
+                st.text(f"Clause {i+1} analysis error: {e}")
                 st.write(f"Clause {i+1}: {chunk[:100]}...")
 
             labeled.append({
@@ -200,6 +202,7 @@ try:
                 "summary": summary,
                 "translated": ""
             })
+
 
 
         st.session_state.labeled_chunks = labeled
