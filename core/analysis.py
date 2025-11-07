@@ -217,22 +217,22 @@ def clean_summary(text):
 
 def summarize_contract(text):
     try:
+        print("Loading summarizer...")
         summarizer = get_summarizer()
     except Exception as e:
-        print(f"Failed to load summarizer: {e}")
-        return "⚠️ Summarizer could not be loaded."
+        print(f"❌ Failed to load summarizer: {e}")
+        return "⚠️ Summarizer could not be loaded. Please review the contract manually."
 
     try:
         input_text = text[:800]
         prompt = f"Extract and summarize the key terms of this contract in plain English:\n\n{input_text}"
-        print(f"Summarizing {len(input_text)} characters...")
+        print(f"🧠 Summarizing {len(input_text)} characters...")
 
         out = summarizer(prompt, max_length=200, min_length=50, do_sample=False)
         raw_summary = out[0]["summary_text"] if isinstance(out, list) else out.get("summary_text", "")
         return clean_summary(raw_summary)
 
     except Exception as e:
-        print(f"Summarization failed: {e}")
+        print(f"❌ Summarization failed: {e}")
         return "⚠️ Unable to summarize contract. Please review manually."
-
 
