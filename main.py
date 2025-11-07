@@ -170,15 +170,14 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         st.metric("📊 Contract Confidence Score", confidence)
 
 # ---------- Risk Report ----------
-st.subheader("📄 Contract Risk Report")
-
-st.markdown(f"**Contract Type:** {contract_types[st.session_state.contract_type]}")
-st.markdown(f"**Total Clauses Analyzed:** {len(labeled)}")
-
-st.markdown("**Risk Breakdown:**")
-st.markdown(f"- High Risk: {risk_counts['High']}")
-st.markdown(f"- Medium Risk: {risk_counts['Medium']}")
-st.markdown(f"- Low Risk: {risk_counts['Low']}")
+report_lines = []
+report_lines.append(f"📄 Contract Risk Report")
+report_lines.append(f"Contract Type: {contract_types[st.session_state.contract_type]}")
+report_lines.append(f"Total Clauses Analyzed: {len(labeled)}")
+report_lines.append(f"Risk Breakdown:")
+report_lines.append(f"- High Risk: {risk_counts['High']}")
+report_lines.append(f"- Medium Risk: {risk_counts['Medium']}")
+report_lines.append(f"- Low Risk: {risk_counts['Low']}")
 
 common_types = {}
 for c in labeled:
@@ -188,14 +187,15 @@ for c in labeled:
     common_types[t] += 1
 
 top_types = sorted(common_types.items(), key=lambda x: x[1], reverse=True)[:3]
-st.markdown("**Most Common Clause Types:** " + ", ".join(t[0] for t in top_types))
-
-st.markdown(f"**Overall Confidence Score:** {confidence}")
+report_lines.append("Most Common Clause Types: " + ", ".join(t[0] for t in top_types))
+report_lines.append(f"Overall Confidence Score: {confidence}")
 
 top_clauses = [c for c in labeled if c["risk"] in ["High", "Medium"]][:5]
-st.markdown("**Top Clauses to Review:**")
+report_lines.append("Top Clauses to Review:")
 for c in top_clauses:
-    st.markdown(f"- Clause {c['id']+1} — {c['type']} — {c['risk']} Risk")
+    report_lines.append(f"- Clause {c['id']+1} — {c['type']} — {c['risk']} Risk")
+
+report_text = "\n".join(report_lines)
 
 st.download_button(
     label="📥 Download Risk Report",
