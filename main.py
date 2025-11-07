@@ -99,8 +99,6 @@ with st.sidebar.expander("🌐 Import from Link"):
                 st.error(f"Error fetching document: {e}")
 
 explain_simple = st.sidebar.checkbox("🧒 Simplify explanations", value=False)
-learn_mode = st.sidebar.checkbox("🧠 Learn as You Go", value=True)
-
  
 with st.sidebar.expander("🧠 Persona Settings"):
         persona = st.text_input("Persona name", value=st.session_state.neg_personas.get("default", {}).get("persona", "Startup Founder"))
@@ -195,10 +193,6 @@ if st.session_state.labeled_chunks:
             and (type_filter == "All" or c["type"] == type_filter)
         ]
 
-        for key in list(st.session_state.keys()):
-            if key.startswith("candidate_edit_") or key.startswith("learn_check_"):
-                del st.session_state[key]
-
         for i, clause in enumerate(filtered_clauses):
             with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
                 st.markdown(highlight_risks(clause["text"]), unsafe_allow_html=True)
@@ -233,17 +227,4 @@ if st.session_state.labeled_chunks:
                     elif clause["type"] == "Scope":
                         st.markdown("- Can we define exactly what services are included?")
 
-                # Learn mode explanation
-                if learn_mode:
-                    st.markdown("**🧠 Do you understand this clause?**")
-                    understanding = st.radio(
-                        f"Understanding Check {clause['id']}",
-                        ["Yes", "Not sure", "No"],
-                        key=f"learn_check_{clause['id']}"
-                    )
-                    if understanding == "No":
-                        explanation = explain_clause_text(clause["text"])
-                        if explanation:
-                            st.info(f"🧾 **What this clause means in simple terms:**\n\n{explanation}")
-                        else:
-                            st.warning("⚠️ Sorry, I couldn't simplify this clause at the moment.")
+                
