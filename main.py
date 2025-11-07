@@ -120,10 +120,8 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
 
         st.write(f"🔍 Analyzing {len(chunks)} clauses...")
 
-        for i, chunk in enumerate(chunks[:100]):
+        for i, chunk in enumerate(chunks[:1000]):
             clause_type, risk_level, summary = "Unknown", "Medium", ""
-            st.write(f"🔍 Clause {i+1} starting...")
-
             try:
                 if not chunk or not isinstance(chunk, str):
                     raise ValueError("Empty or invalid clause text")
