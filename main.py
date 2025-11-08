@@ -318,22 +318,48 @@ if st.session_state.get("analysis_done"):
                 # Civilian-friendly suggestions
             if clause["risk"] in ["High", "Medium"]:
                 with st.expander("💬 What you could ask"):
-                    if clause["type"] == "Termination":
-                                st.markdown("- Can we extend the notice period?")
-                                st.markdown("- Can termination only happen with cause?")
-                    elif clause["type"] == "Payment":
-                                st.markdown("- Can we clarify late fees or payment schedule?")
-                    elif clause["type"] == "Confidentiality":
-                        st.markdown("- Can we limit how long confidentiality lasts?")
-                    elif clause["type"] == "Liability":
-                        st.markdown("- Can we cap the damages or limit responsibility?")
-                    elif clause["type"] == "IP":
-                        st.markdown("- Can we clarify who owns the work created?")
-                    elif clause["type"] == "Scope":
-                        st.markdown("- Can we define exactly what services are included?")
-                    elif clause["type"] == "Unknown":
-                        st.markdown("- Can we clarify the intent of this clause?")
-                        st.markdown("- Is this clause necessary or redundant?")
-                        st.markdown("- Can we simplify or reword this section?")
+                    prompts = []
 
-                    
+                    if clause["type"] == "Termination":
+                        prompts = [
+                            "Can we extend the notice period?",
+                            "Can termination only happen with cause?"
+                        ]
+                    elif clause["type"] == "Payment":
+                        prompts = [
+                            "Can we clarify late fees or payment schedule?"
+                        ]
+                    elif clause["type"] == "Confidentiality":
+                        prompts = [
+                            "Can we limit how long confidentiality lasts?"
+                        ]
+                    elif clause["type"] == "Liability":
+                        prompts = [
+                            "Can we cap the damages or limit responsibility?"
+                        ]
+                    elif clause["type"] == "IP":
+                        prompts = [
+                            "Can we clarify who owns the work created?"
+                        ]
+                    elif clause["type"] == "Scope":
+                        prompts = [
+                            "Can we define exactly what services are included?"
+                        ]
+                    elif clause["type"] == "Unknown":
+                        prompts = [
+                            "Can we clarify the intent of this clause?",
+                            "Is this clause necessary or redundant?",
+                            "Can we simplify or reword this section?"
+                        ]
+                    else:
+                        prompts = [
+                            "Can we clarify the intent of this clause?",
+                            "Is this clause necessary or redundant?",
+                            "Can we simplify or reword this section?"
+                        ]
+
+                    for p in prompts:
+                        st.markdown(f"- {p}")
+
+
+                                
