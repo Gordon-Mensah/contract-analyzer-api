@@ -155,7 +155,7 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
                 "translated": ""
             })
 
-        st.session_state.labeled_chunks = labeled
+        
         st.session_state.analysis_done = True
         st.success(f"{len(labeled)} clauses analyzed.")
         st.write(f"⏱️ Clause analysis took {time.time() - start:.2f} seconds")
@@ -297,8 +297,6 @@ if st.session_state.get("analysis_done"):
             and (type_filter == "All" or c["type"] == type_filter)
             ]
 
-        for i, clause in enumerate(filtered_clauses):
-            st.text_area(f"Clause {i+1}", clause["text"], key=f"clause_text_{i}")
 
         for i, clause in enumerate(filtered_clauses):
             with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
