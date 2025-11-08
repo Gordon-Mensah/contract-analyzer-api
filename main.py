@@ -282,5 +282,9 @@ if st.session_state.labeled_chunks:
                         st.markdown("- Can we clarify who owns the work created?")
                     elif clause["type"] == "Scope":
                         st.markdown("- Can we define exactly what services are included?")
+                    elif clause["type"] == "Unknown":
+                        st.markdown("- Can we clarify the intent of this clause?")
+                        st.markdown("- Is this clause necessary or redundant?")
+                        st.markdown("- Can we simplify or reword this section?")
 
                     
