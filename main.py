@@ -25,6 +25,8 @@ from core.analysis import (
 from core.utils import highlight_risks, format_badges
 from core.samples import get_sample_contract
 from core.analysis import detect_clause_type, detect_risk_level
+from core.analysis import detect_clause_type_auto, detect_risk_level_auto
+
 from core.config import keyword_map, risk_terms
 
 
