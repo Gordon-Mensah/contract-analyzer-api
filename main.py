@@ -26,7 +26,6 @@ from core.utils import highlight_risks, format_badges
 from core.samples import get_sample_contract
 from core.analysis import detect_clause_type, detect_risk_level
 from core.analysis import detect_clause_type_auto, detect_risk_level_auto
-
 from core.config import keyword_map, risk_terms
 
 
@@ -284,8 +283,11 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
 if st.session_state.labeled_chunks:
         st.subheader("🧩 Clause Review")
 
-        risk_filter = st.selectbox("Filter by Risk Level", ["All", "High", "Medium", "Low"])
-        type_filter = st.selectbox("Filter by Clause Type", ["All"] + sorted(set(c["type"] for c in st.session_state.labeled_chunks)))
+        risk_filter = st.selectbox("Filter by Risk Level", ["All", "High", "Medium", "Low"], key="risk_filter")
+        type_filter = st.selectbox("Filter by Clause Type", clause_types, key="type_filter")
+        for i, clause in enumerate(filtered_clauses):
+            st.text_area(f"Clause {i+1}", clause["text"], key=f"clause_text_{i}")
+
 
         filtered_clauses = [
             c for c in st.session_state.labeled_chunks
