@@ -4,6 +4,8 @@ from docx import Document
 import pdfplumber
 import warnings
 from core.clause_explanations import clause_type_explanations
+from core.config import risk_terms, default_risk_by_type
+
 
 try:
     from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -136,20 +138,20 @@ keyword_map = {
 
 
 risk_terms = {
-    "High": [
-        "indemnify", "exclusive", "binding", "liquidated damages", "termination for cause",
-        "unlimited liability", "injunction", "non-compete", "penalty", "breach of contract",
-        "hold harmless", "waiver of rights", "irrevocable", "enforceable", "non-solicitation"
-    ],
-    "Medium": [
-        "termination", "confidential", "governing law", "jurisdiction", "auto-renewal",
-        "assignment", "force majeure", "compliance", "third-party", "limited liability",
-        "notice period", "modification", "dispute resolution", "arbitration"
-    ],
-    "Low": [
-        "payment", "invoice", "duration", "schedule", "definitions", "headings",
-        "entire agreement", "timeline", "services", "deliverables", "fee", "scope"
-    ]
+        "High": [
+            "shall indemnify", "exclusive rights", "binding obligation", "unlimited liability",
+            "termination for cause", "liquidated damages", "non-solicitation", "hold harmless",
+            "irrevocable license", "injunctive relief", "waiver of claims"
+        ],
+        "Medium": [
+            "termination notice", "confidential information", "governing law", "force majeure",
+            "assignment rights", "limited liability", "arbitration clause", "compliance obligations"
+        ],
+        "Low": [
+            "payment terms", "invoice due", "contract duration", "scope of services",
+            "definitions section", "entire agreement", "timeline", "deliverables"
+        ]
+
 }
 
 
@@ -265,27 +267,13 @@ def detect_risk_level(text, clause_type, risk_terms):
     text = text.lower()
     scores = {"High": 0, "Medium": 0, "Low": 0}
 
-    # Count keyword matches
     for level, keywords in risk_terms.items():
         for kw in keywords:
             if kw in text:
                 scores[level] += 1
 
-    # Boost score based on clause type
-    if clause_type in ["Liability", "Termination", "IP"]:
-        scores["High"] += 1
-    elif clause_type in ["Confidentiality", "Restrictions", "Warranty"]:
-        scores["Medium"] += 1
-    elif clause_type in ["Payment", "Scope", "Returns"]:
-        scores["Low"] += 1
+    # If no keywords matched, use clause type fallback
+    if all(score == 0 for score in scores.values()):
+        return default_risk_by_type.get(clause_type, "Medium")
 
-    # Return the highest score
-    if any(scores.values()):
-        return max(scores, key=scores.get)
-    return "Medium"
-
-
-    if scores["High"] == scores["Medium"] == scores["Low"]:
-        if "Termination" in clause_type or "Liability" in clause_type:
-            return "High"
-        return "Medium"
+    return max(scores, key=scores.get)

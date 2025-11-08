@@ -34,3 +34,18 @@ risk_terms = {
         "schedule", "timeline", "definitions", "headings", "entire agreement"
     ]
 }
+
+# Default risk level by clause type
+default_risk_by_type = {
+    "Liability": "High",
+    "Termination": "High",
+    "IP": "High",
+    "Confidentiality": "Medium",
+    "Restrictions": "Medium",
+    "Warranty": "Medium",
+    "Payment": "Low",
+    "Scope": "Low",
+    "Returns": "Low",
+    "General": "Medium",
+    "Unknown": "Medium"
+}
