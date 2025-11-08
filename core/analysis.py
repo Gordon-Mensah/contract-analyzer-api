@@ -1,4 +1,6 @@
 import os
+import streamlit as st
+
 import re
 from docx import Document
 import pdfplumber
