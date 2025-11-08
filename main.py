@@ -51,6 +51,8 @@ if st.button("📄 Load Sample Contract"):
         sample_text = get_sample_contract(st.session_state.contract_type)
         st.session_state.negotiation_text = sample_text
         st.session_state.contract_loaded = True
+        st.session_state.analysis_done = False
+
         st.success(f"Sample {contract_types[st.session_state.contract_type]} contract loaded.")
 
     # ---------- Session defaults ----------
@@ -282,7 +284,7 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
 
 
     # ---------- Clause Review ----------
-if st.session_state.labeled_chunks:
+if st.session_state.get("analysis_done"):
         st.subheader("🧩 Clause Review")
         clause_types = ["All"] + sorted(set(c["type"] for c in st.session_state.labeled_chunks))
 
