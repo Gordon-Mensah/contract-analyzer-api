@@ -16,54 +16,79 @@ except Exception:
 # ---------- Clause Detection Maps ----------
 keyword_map = {
     "nda": {
-        "Confidentiality": [
-            "confidential", "non-disclosure", "secret", "proprietary", "private", "classified", "sensitive", "internal",
-            "nonpublic", "restricted", "undisclosed", "privacy", "secure", "protected information"
+            "Confidentiality": [
+                "confidential", "non-disclosure", "secret", "proprietary", "private", "classified", "sensitive", "internal",
+                "nonpublic", "restricted", "undisclosed", "privacy", "secure", "protected information",
+                "data protection", "confidential materials", "security protocol", "access restriction", "information control",
+                "trade secret", "non-circulation", "non-public", "restricted access", "data classification"
         ],
-        "Restrictions": [
-            "reverse engineer", "copy", "replicate", "duplicate", "unauthorized", "prohibit", "ban", "limit", "restrict",
-            "disclose", "use limitation", "access control", "redistribute", "circumvent"
+            "Restrictions": [
+                "reverse engineer", "copy", "replicate", "duplicate", "unauthorized", "prohibit", "ban", "limit", "restrict",
+                "disclose", "use limitation", "access control", "redistribute", "circumvent",
+                "derive", "reproduce", "transmit", "extract", "misuse", "interfere", "tamper",
+                "non-use", "non-sharing", "non-transfer", "non-distribution", "non-reproduction"
         ],
         "Termination": [
-            "terminate", "end", "cancel", "conclude", "expire", "cease", "withdraw", "revoke",
-            "termination date", "duration", "survival", "post-termination"
+                "terminate", "end", "cancel", "conclude", "expire", "cease", "withdraw", "revoke",
+                "termination date", "duration", "survival", "post-termination",
+                "expiration", "termination clause", "validity period", "termination notice",
+                "sunset clause", "contract end", "termination trigger"
         ]
+
     },
     "rental": {
         "Payment": [
             "rent", "deposit", "fee", "dues", "installment", "charge", "billing", "cost",
-            "late fee", "monthly", "security deposit", "utilities", "arrears"
-        ],
+            "late fee", "monthly", "security deposit", "utilities", "arrears",
+            "rental amount", "payment schedule", "due date", "nonpayment", "financial obligation",
+            "rent increase", "rent adjustment", "payment default"
+    ],
         "Termination": [
             "eviction", "terminate", "notice", "vacate", "end lease", "cancel", "quit", "release",
-            "early termination", "break lease", "non-renewal", "move-out"
+            "early termination", "break lease", "non-renewal", "move-out",
+            "termination clause", "lease expiration", "termination rights", "termination conditions",
+            "lease breach", "termination penalty", "termination fee"
         ],
         "Maintenance": [
             "repair", "damage", "cleaning", "upkeep", "fix", "restore", "service", "maintain",
-            "wear and tear", "maintenance request", "inspection", "condition", "replace"
+            "wear and tear", "maintenance request", "inspection", "condition", "replace",
+            "maintenance responsibility", "property condition", "repairs required", "cleanliness",
+            "tenant obligations", "landlord duties", "repair timeline"
         ],
         "Liability": [
             "insurance", "liability", "damages", "responsibility", "accountable", "fault", "risk", "cover",
-            "negligence", "indemnify", "loss", "hazard", "incident"
+            "negligence", "indemnify", "loss", "hazard", "incident",
+            "liability waiver", "tenant responsibility", "property damage", "third-party claims",
+            "accident", "injury", "legal exposure"
         ]
+
     },
     "employment": {
         "Duties": [
             "responsibilities", "tasks", "role", "reporting", "obligations", "functions", "assignments",
-            "job description", "performance", "expectations", "scope of work"
+            "job description", "performance", "expectations", "scope of work",
+            "duties", "workload", "job title", "chain of command", "supervision",
+            "job responsibilities", "work expectations", "employee obligations"
         ],
         "Compensation": [
             "salary", "bonus", "benefits", "pay", "wages", "income", "remuneration", "package",
-            "equity", "stock options", "commission", "pension", "reimbursement"
+            "equity", "stock options", "commission", "pension", "reimbursement",
+            "compensation structure", "pay frequency", "incentives", "financial package",
+            "variable pay", "performance bonus", "compensation review"
         ],
         "Termination": [
             "resignation", "dismissal", "notice", "severance", "layoff", "exit", "release",
-            "termination clause", "cause", "at-will", "final paycheck", "termination date"
+            "termination clause", "cause", "at-will", "final paycheck", "termination date",
+            "termination rights", "termination process", "exit interview", "termination conditions",
+            "termination benefits", "termination notice", "termination agreement"
         ],
         "IP": [
             "intellectual property", "invention", "ownership", "patent", "copyright", "trademark", "creation",
-            "work product", "assign", "developed during employment", "moral rights"
+            "work product", "assign", "developed during employment", "moral rights",
+            "IP rights", "innovation", "proprietary work", "employee inventions",
+            "IP assignment", "ownership clause", "creative output"
         ]
+
     },
     "service": {
         "Scope": [
