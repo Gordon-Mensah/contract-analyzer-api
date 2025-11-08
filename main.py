@@ -288,15 +288,14 @@ if st.session_state.labeled_chunks:
 
         risk_filter = st.selectbox("Filter by Risk Level", ["All", "High", "Medium", "Low"], key="risk_filter")
         type_filter = st.selectbox("Filter by Clause Type", clause_types, key="type_filter")
-        for i, clause in enumerate(filtered_clauses):
-            st.text_area(f"Clause {i+1}", clause["text"], key=f"clause_text_{i}")
-
-
         filtered_clauses = [
             c for c in st.session_state.labeled_chunks
             if (risk_filter == "All" or c["risk"] == risk_filter)
             and (type_filter == "All" or c["type"] == type_filter)
-        ]
+            ]
+
+        for i, clause in enumerate(filtered_clauses):
+            st.text_area(f"Clause {i+1}", clause["text"], key=f"clause_text_{i}")
 
         for i, clause in enumerate(filtered_clauses):
             with st.expander(f"Clause {i+1}: {format_badges(clause['type'], clause['risk'])}"):
