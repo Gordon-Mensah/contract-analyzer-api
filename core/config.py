@@ -13,3 +13,24 @@ DEFAULT_WEIGHTS = {"w_risk": 2.0, "w_sim": 1.0, "w_len": 0.5}
 AUTO_TRAIN_THRESHOLD = 50
 MIN_SAMPLES_FOR_MODEL = 20
 MIN_POSITIVE_FOR_MODEL = 5
+
+# Clause classification keywords
+keyword_map = {
+    # (Paste your full expanded keyword_map here)
+}
+
+# Risk classification keywords
+risk_terms = {
+    "High": [
+        "penalty", "exclusive", "binding", "indemnify", "irreversible",
+        "non-compete", "liquidated damages", "termination for cause", "unlimited liability", "injunction"
+    ],
+    "Medium": [
+        "termination", "confidential", "governing law", "non-compete",
+        "auto-renewal", "assignment", "jurisdiction", "force majeure", "compliance"
+    ],
+    "Low": [
+        "notice", "duration", "payment", "invoice",
+        "schedule", "timeline", "definitions", "headings", "entire agreement"
+    ]
+}
