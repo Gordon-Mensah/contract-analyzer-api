@@ -16,44 +16,115 @@ except Exception:
 # ---------- Clause Detection Maps ----------
 keyword_map = {
     "nda": {
-        "Confidentiality": ["confidential", "non-disclosure", "secret", "proprietary", "private", "classified", "sensitive", "internal"],
-        "Restrictions": ["reverse engineer", "copy", "replicate", "duplicate", "unauthorized", "prohibit", "ban", "limit", "restrict"],
-        "Termination": ["terminate", "end", "cancel", "conclude", "expire", "cease", "withdraw", "revoke"]
+        "Confidentiality": [
+            "confidential", "non-disclosure", "secret", "proprietary", "private", "classified", "sensitive", "internal",
+            "nonpublic", "restricted", "undisclosed", "privacy", "secure", "protected information"
+        ],
+        "Restrictions": [
+            "reverse engineer", "copy", "replicate", "duplicate", "unauthorized", "prohibit", "ban", "limit", "restrict",
+            "disclose", "use limitation", "access control", "redistribute", "circumvent"
+        ],
+        "Termination": [
+            "terminate", "end", "cancel", "conclude", "expire", "cease", "withdraw", "revoke",
+            "termination date", "duration", "survival", "post-termination"
+        ]
     },
     "rental": {
-        "Payment": ["rent", "deposit", "fee", "dues", "installment", "charge", "billing", "cost"],
-        "Termination": ["eviction", "terminate", "notice", "vacate", "end lease", "cancel", "quit", "release"],
-        "Maintenance": ["repair", "damage", "cleaning", "upkeep", "fix", "restore", "service", "maintain"],
-        "Liability": ["insurance", "liability", "damages", "responsibility", "accountable", "fault", "risk", "cover"]
+        "Payment": [
+            "rent", "deposit", "fee", "dues", "installment", "charge", "billing", "cost",
+            "late fee", "monthly", "security deposit", "utilities", "arrears"
+        ],
+        "Termination": [
+            "eviction", "terminate", "notice", "vacate", "end lease", "cancel", "quit", "release",
+            "early termination", "break lease", "non-renewal", "move-out"
+        ],
+        "Maintenance": [
+            "repair", "damage", "cleaning", "upkeep", "fix", "restore", "service", "maintain",
+            "wear and tear", "maintenance request", "inspection", "condition", "replace"
+        ],
+        "Liability": [
+            "insurance", "liability", "damages", "responsibility", "accountable", "fault", "risk", "cover",
+            "negligence", "indemnify", "loss", "hazard", "incident"
+        ]
     },
     "employment": {
-        "Duties": ["responsibilities", "tasks", "role", "reporting", "obligations", "functions", "assignments"],
-        "Compensation": ["salary", "bonus", "benefits", "pay", "wages", "income", "remuneration", "package"],
-        "Termination": ["resignation", "dismissal", "notice", "severance", "layoff", "exit", "release"],
-        "IP": ["intellectual property", "invention", "ownership", "patent", "copyright", "trademark", "creation"]
+        "Duties": [
+            "responsibilities", "tasks", "role", "reporting", "obligations", "functions", "assignments",
+            "job description", "performance", "expectations", "scope of work"
+        ],
+        "Compensation": [
+            "salary", "bonus", "benefits", "pay", "wages", "income", "remuneration", "package",
+            "equity", "stock options", "commission", "pension", "reimbursement"
+        ],
+        "Termination": [
+            "resignation", "dismissal", "notice", "severance", "layoff", "exit", "release",
+            "termination clause", "cause", "at-will", "final paycheck", "termination date"
+        ],
+        "IP": [
+            "intellectual property", "invention", "ownership", "patent", "copyright", "trademark", "creation",
+            "work product", "assign", "developed during employment", "moral rights"
+        ]
     },
     "service": {
-        "Scope": ["services", "deliverables", "timeline", "schedule", "coverage", "extent", "range", "tasks"],
-        "Payment": ["fee", "invoice", "payment terms", "cost", "charge", "rate", "billing"],
-        "Termination": ["cancel", "terminate", "breach", "end", "revoke", "discontinue", "cease"],
-        "Liability": ["indemnify", "damages", "limitation", "responsibility", "risk", "cover", "accountability"]
+        "Scope": [
+            "services", "deliverables", "timeline", "schedule", "coverage", "extent", "range", "tasks",
+            "milestones", "project plan", "statement of work", "SOW", "service levels"
+        ],
+        "Payment": [
+            "fee", "invoice", "payment terms", "cost", "charge", "rate", "billing",
+            "hourly", "fixed fee", "retainer", "due date", "net 30"
+        ],
+        "Termination": [
+            "cancel", "terminate", "breach", "end", "revoke", "discontinue", "cease",
+            "termination for convenience", "termination for cause", "notice period"
+        ],
+        "Liability": [
+            "indemnify", "damages", "limitation", "responsibility", "risk", "cover", "accountability",
+            "cap", "liability waiver", "third-party claims", "consequential damages"
+        ]
     },
     "sales": {
-        "Price": ["price", "cost", "payment", "rate", "charge", "amount", "value"],
-        "Delivery": ["shipment", "delivery", "timeline", "dispatch", "send", "transport", "arrival"],
-        "Warranty": ["warranty", "guarantee", "defect", "assurance", "coverage", "promise", "quality"],
-        "Returns": ["refund", "return", "exchange", "credit", "replacement", "cancel", "reverse"]
+        "Price": [
+            "price", "cost", "payment", "rate", "charge", "amount", "value",
+            "pricing", "quote", "fee", "discount", "markup"
+        ],
+        "Delivery": [
+            "shipment", "delivery", "timeline", "dispatch", "send", "transport", "arrival",
+            "FOB", "shipping terms", "carrier", "lead time", "logistics"
+        ],
+        "Warranty": [
+            "warranty", "guarantee", "defect", "assurance", "coverage", "promise", "quality",
+            "merchantability", "fitness for purpose", "repair", "replace", "limited warranty"
+        ],
+        "Returns": [
+            "refund", "return", "exchange", "credit", "replacement", "cancel", "reverse",
+            "RMA", "restocking fee", "return policy", "return period"
+        ]
     },
     "other": {
-        "General": ["agreement", "party", "terms", "conditions", "contract", "deal", "understanding"]
+        "General": [
+            "agreement", "party", "terms", "conditions", "contract", "deal", "understanding",
+            "obligations", "rights", "governing law", "jurisdiction", "entire agreement"
+        ]
     }
 }
 
+
 risk_terms = {
-    "High": ["penalty", "exclusive", "binding", "indemnify", "irreversible"],
-    "Medium": ["termination", "confidential", "governing law", "non-compete"],
-    "Low": ["notice", "duration", "payment", "invoice"]
+    "High": [
+        "penalty", "exclusive", "binding", "indemnify", "irreversible",
+        "non-compete", "liquidated damages", "termination for cause", "unlimited liability", "injunction"
+    ],
+    "Medium": [
+        "termination", "confidential", "governing law", "non-compete",
+        "auto-renewal", "assignment", "jurisdiction", "force majeure", "compliance"
+    ],
+    "Low": [
+        "notice", "duration", "payment", "invoice",
+        "schedule", "timeline", "definitions", "headings", "entire agreement"
+    ]
 }
+
 
 # ---------- Core Functions ----------
 def load_contract(file):
