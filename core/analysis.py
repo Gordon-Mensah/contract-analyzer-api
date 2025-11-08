@@ -249,3 +249,18 @@ def explain_clause_text(text):
         return "This clause defines who is responsible if something goes wrong."
     else:
         return "This clause covers general terms and conditions related to the agreement."
+
+def detect_clause_type(text, contract_type, keyword_map):
+    text = text.lower()
+    type_keywords = keyword_map.get(contract_type, {})
+    for clause_type, keywords in type_keywords.items():
+        if any(kw in text for kw in keywords):
+            return clause_type
+    return "Unknown"
+
+def detect_risk_level(text, risk_terms):
+    text = text.lower()
+    for level, keywords in risk_terms.items():
+        if any(kw in text for kw in keywords):
+            return level
+    return "Medium"

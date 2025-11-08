@@ -22,6 +22,9 @@ from core.analysis import (
 
 from core.utils import highlight_risks, format_badges
 from core.samples import get_sample_contract
+from core.analysis import detect_clause_type, detect_risk_level
+from core.config import keyword_map, risk_terms
+
 
 st.set_page_config(page_title="Contract Intelligence", page_icon="📄", layout="wide")
 
@@ -121,7 +124,10 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         st.write(f"🔍 Analyzing {len(chunks)} clauses...")
 
         for i, chunk in enumerate(chunks[:1000]):
-            clause_type, risk_level, summary = "Unknown", "Medium", ""
+            clause_type = detect_clause_type(chunk, st.session_state.contract_type, keyword_map)
+            risk_level = detect_risk_level(chunk, risk_terms)
+            summary = ""  # You can add summarization later
+
             try:
                 if not chunk or not isinstance(chunk, str):
                     raise ValueError("Empty or invalid clause text")
