@@ -1,4 +1,6 @@
 import streamlit as st
+import pandas as pd
+import plotly.express as px
 import requests
 import tempfile
 import io
@@ -151,6 +153,38 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         st.session_state.labeled_chunks = labeled
         st.success(f"{len(labeled)} clauses analyzed.")
         st.write(f"⏱️ Clause analysis took {time.time() - start:.2f} seconds")
+
+        # ---------- Dashboard View ----------
+        st.subheader("📊 Dashboard View")
+
+        # Convert labeled clauses to DataFrame
+        df = pd.DataFrame(labeled)
+
+        # Clause Type Distribution
+        st.markdown("### Clause Type Distribution")
+        type_counts = df['type'].value_counts().reset_index()
+        fig_type = px.bar(type_counts, x='index', y='type', labels={'index': 'Clause Type', 'type': 'Count'})
+        st.plotly_chart(fig_type)
+
+        # Risk Level Breakdown
+        st.markdown("### Risk Level Breakdown")
+        risk_counts_df = df['risk'].value_counts().reset_index()
+        fig_risk = px.pie(risk_counts_df, names='index', values='risk', title='Clause Risk Levels')
+        st.plotly_chart(fig_risk)
+
+        # Clause Table with Filters
+        st.markdown("### Clause Table")
+        selected_type = st.selectbox("Filter by Clause Type", ["All"] + sorted(df['type'].unique()))
+        selected_risk = st.selectbox("Filter by Risk Level", ["All"] + sorted(df['risk'].unique()))
+
+        filtered_df = df.copy()
+        if selected_type != "All":
+            filtered_df = filtered_df[filtered_df['type'] == selected_type]
+        if selected_risk != "All":
+            filtered_df = filtered_df[filtered_df['risk'] == selected_risk]
+
+        st.dataframe(filtered_df[['id', 'type', 'risk', 'text']])
+
 
         risk_counts = {"High": 0, "Medium": 0, "Low": 0}
         for c in labeled:
