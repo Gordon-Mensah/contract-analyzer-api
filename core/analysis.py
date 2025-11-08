@@ -300,7 +300,7 @@ def negotiation_tip(clause_type, risk_level):
         return "Ensure the duration of confidentiality is reasonable."
     return ""
 
-
+@st.cache_data
 def detect_clause_type_auto(text):
     labels = [
         "Termination", "Payment", "Confidentiality", "Liability", "IP",
@@ -309,6 +309,7 @@ def detect_clause_type_auto(text):
     result = classifier(text, candidate_labels=labels)
     return result['labels'][0]
 
+@st.cache_data
 def detect_risk_level_auto(text):
     labels = ["High", "Medium", "Low"]
     result = classifier(text, candidate_labels=labels)

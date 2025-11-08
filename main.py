@@ -103,10 +103,8 @@ with st.sidebar.expander("🌐 Import from Link"):
 
 explain_simple = st.sidebar.checkbox("🧒 Simplify explanations", value=False)
  
-with st.sidebar.expander("🧠 Persona Settings"):
-        persona = st.text_input("Persona name", value=st.session_state.neg_personas.get("default", {}).get("persona", "Startup Founder"))
-        style = st.selectbox("Rewrite style", ["Plain English", "Legalese", "Assertive", "Concise", "Friendly"])
-        st.session_state.neg_personas["default"] = {"persona": persona, "style": style}
+use_model = st.sidebar.checkbox("🧠 Use Smart Classifier (semantic)", value=False)
+
 
     # ---------- Main UI ----------
 if st.session_state.contract_loaded:
@@ -127,9 +125,13 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         st.write(f"🔍 Analyzing {len(chunks)} clauses...")
 
         for i, chunk in enumerate(chunks[:1000]):
-            clause_type = detect_clause_type_auto(chunk)
-            risk_level = detect_risk_level_auto(chunk)
-            summary = ""  # You can add summarization later
+            if use_model:
+                clause_type = detect_clause_type_auto(chunk)
+                risk_level = detect_risk_level_auto(chunk)
+            else:
+                clause_type = detect_clause_type(chunk, st.session_state.contract_type, keyword_map)
+                risk_level = detect_risk_level(chunk, clause_type, risk_terms)
+
 
             try:
                 if not chunk or not isinstance(chunk, str):
