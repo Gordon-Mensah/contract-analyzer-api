@@ -6,6 +6,9 @@ import warnings
 from core.clause_explanations import clause_type_explanations
 from core.config import risk_terms, default_risk_by_type
 
+from transformers import pipeline
+
+classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 try:
     from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -258,10 +261,15 @@ def explain_clause_text(text):
 def detect_clause_type(text, contract_type, keyword_map):
     text = text.lower()
     type_keywords = keyword_map.get(contract_type, {})
+    best_match = ("Unknown", 0)
+
     for clause_type, keywords in type_keywords.items():
-        if any(kw in text for kw in keywords):
-            return clause_type
-    return "Unknown"
+        matches = sum(1 for kw in keywords if kw in text)
+        if matches > best_match[1]:
+            best_match = (clause_type, matches)
+
+    return best_match[0] if best_match[1] > 0 else "Unknown"
+
 
 def detect_risk_level(text, clause_type, risk_terms):
     text = text.lower()
@@ -277,3 +285,31 @@ def detect_risk_level(text, clause_type, risk_terms):
         return default_risk_by_type.get(clause_type, "Medium")
 
     return max(scores, key=scores.get)
+
+
+def score_clause_confidence(text, keywords):
+    matches = sum(1 for kw in keywords if kw in text.lower())
+    return min(100, matches * 10)  # Example scaling
+
+def negotiation_tip(clause_type, risk_level):
+    if clause_type == "Termination" and risk_level == "High":
+        return "Consider adding a mutual termination clause or notice period."
+    if clause_type == "Liability" and risk_level == "High":
+        return "Negotiate a liability cap or indemnity limit."
+    if clause_type == "Confidentiality" and risk_level == "Medium":
+        return "Ensure the duration of confidentiality is reasonable."
+    return ""
+
+
+def detect_clause_type_auto(text):
+    labels = [
+        "Termination", "Payment", "Confidentiality", "Liability", "IP",
+        "Scope", "Returns", "Warranty", "Duties", "Compensation", "General"
+    ]
+    result = classifier(text, candidate_labels=labels)
+    return result['labels'][0]
+
+def detect_risk_level_auto(text):
+    labels = ["High", "Medium", "Low"]
+    result = classifier(text, candidate_labels=labels)
+    return result['labels'][0]
