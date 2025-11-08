@@ -194,6 +194,40 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
 
         report_text = "\n".join(report_lines)
 
+        report_lines.append("Negotiation Prompts:")
+        for c in top_clauses:
+            prompts = []
+            if c["type"] == "Termination":
+                prompts = [
+                    "Can we extend the notice period?",
+                    "Can termination only happen with cause?"
+                ]
+            elif c["type"] == "Payment":
+                prompts = [
+                    "Can we clarify late fees or payment schedule?"
+                ]
+            elif c["type"] == "Confidentiality":
+                prompts = [
+                    "Can we limit how long confidentiality lasts?"
+                ]
+            elif c["type"] == "Liability":
+                prompts = [
+                    "Can we cap the damages or limit responsibility?"
+                ]
+            elif c["type"] == "IP":
+                prompts = [
+                    "Can we clarify who owns the work created?"
+                ]
+            elif c["type"] == "Scope":
+                prompts = [
+                    "Can we define exactly what services are included?"
+                ]
+            if prompts:
+                report_lines.append(f"- Clause {c['id']+1} ({c['type']}):")
+                for p in prompts:
+                    report_lines.append(f"  • {p}")
+
+
         st.download_button(
             label="📥 Download Risk Report",
             data=report_text,
@@ -233,20 +267,20 @@ if st.session_state.labeled_chunks:
                         st.info(f"🧾 **Simple Explanation:**\n\n{explanation}")
 
                 # Civilian-friendly suggestions
-                if clause["risk"] in ["High", "Medium"]:
-                    st.markdown("💬 **What you could ask:**")
-                    if clause["type"] == "Termination":
-                        st.markdown("- Can we extend the notice period?")
-                        st.markdown("- Can termination only happen with cause?")
-                    elif clause["type"] == "Payment":
-                        st.markdown("- Can we clarify late fees or payment schedule?")
-                    elif clause["type"] == "Confidentiality":
-                        st.markdown("- Can we limit how long confidentiality lasts?")
-                    elif clause["type"] == "Liability":
-                        st.markdown("- Can we cap the damages or limit responsibility?")
-                    elif clause["type"] == "IP":
-                        st.markdown("- Can we clarify who owns the work created?")
-                    elif clause["type"] == "Scope":
-                        st.markdown("- Can we define exactly what services are included?")
+        if clause["risk"] in ["High", "Medium"]:
+            with st.expander("💬 What you could ask"):
+                if clause["type"] == "Termination":
+                            st.markdown("- Can we extend the notice period?")
+                            st.markdown("- Can termination only happen with cause?")
+                elif clause["type"] == "Payment":
+                            st.markdown("- Can we clarify late fees or payment schedule?")
+                elif clause["type"] == "Confidentiality":
+                    st.markdown("- Can we limit how long confidentiality lasts?")
+                elif clause["type"] == "Liability":
+                    st.markdown("- Can we cap the damages or limit responsibility?")
+                elif clause["type"] == "IP":
+                    st.markdown("- Can we clarify who owns the work created?")
+                elif clause["type"] == "Scope":
+                    st.markdown("- Can we define exactly what services are included?")
 
                 
