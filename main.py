@@ -121,7 +121,7 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
             st.error(f"🚨 Failed to chunk contract: {e}")
             chunks = []
 
-        chunks = chunks[:300]
+        chunks = chunks[:3000]
         labeled = []
 
         st.write(f"🔍 Analyzing {len(chunks)} clauses...")
