@@ -163,13 +163,15 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
         # Clause Type Distribution
         st.markdown("### Clause Type Distribution")
         type_counts = df['type'].value_counts().reset_index()
-        fig_type = px.bar(type_counts, x='index', y='type', labels={'index': 'Clause Type', 'type': 'Count'})
+        type_counts.columns = ['Clause Type', 'Count']
+        fig_type = px.bar(type_counts, x='Clause Type', y='Count', labels={'Clause Type': 'Clause Type', 'Count': 'Count'})
         st.plotly_chart(fig_type)
 
         # Risk Level Breakdown
         st.markdown("### Risk Level Breakdown")
         risk_counts_df = df['risk'].value_counts().reset_index()
-        fig_risk = px.pie(risk_counts_df, names='index', values='risk', title='Clause Risk Levels')
+        risk_counts_df.columns = ['Risk Level', 'Count']
+        fig_risk = px.pie(risk_counts_df, names='Risk Level', values='Count', title='Clause Risk Levels')
         st.plotly_chart(fig_risk)
 
         # Clause Table with Filters
