@@ -284,6 +284,7 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
     # ---------- Clause Review ----------
 if st.session_state.labeled_chunks:
         st.subheader("🧩 Clause Review")
+        clause_types = ["All"] + sorted(df['type'].unique())
 
         risk_filter = st.selectbox("Filter by Risk Level", ["All", "High", "Medium", "Low"], key="risk_filter")
         type_filter = st.selectbox("Filter by Clause Type", clause_types, key="type_filter")
