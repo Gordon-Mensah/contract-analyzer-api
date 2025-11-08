@@ -125,7 +125,7 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
 
         for i, chunk in enumerate(chunks[:1000]):
             clause_type = detect_clause_type(chunk, st.session_state.contract_type, keyword_map)
-            risk_level = detect_risk_level(chunk, risk_terms)
+            risk_level = detect_risk_level(chunk, clause_type, risk_terms)
             summary = ""  # You can add summarization later
 
             try:

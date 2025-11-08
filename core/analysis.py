@@ -261,15 +261,29 @@ def detect_clause_type(text, contract_type, keyword_map):
             return clause_type
     return "Unknown"
 
-def detect_risk_level(text, risk_terms):
+def detect_risk_level(text, clause_type, risk_terms):
     text = text.lower()
     scores = {"High": 0, "Medium": 0, "Low": 0}
+
+    # Count keyword matches
     for level, keywords in risk_terms.items():
         for kw in keywords:
             if kw in text:
                 scores[level] += 1
-    # Return the level with the highest score
-    return max(scores, key=scores.get) if any(scores.values()) else "Medium"
+
+    # Boost score based on clause type
+    if clause_type in ["Liability", "Termination", "IP"]:
+        scores["High"] += 1
+    elif clause_type in ["Confidentiality", "Restrictions", "Warranty"]:
+        scores["Medium"] += 1
+    elif clause_type in ["Payment", "Scope", "Returns"]:
+        scores["Low"] += 1
+
+    # Return the highest score
+    if any(scores.values()):
+        return max(scores, key=scores.get)
+    return "Medium"
+
 
     if scores["High"] == scores["Medium"] == scores["Low"]:
         if "Termination" in clause_type or "Liability" in clause_type:
