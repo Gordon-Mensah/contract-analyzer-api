@@ -267,20 +267,20 @@ if st.session_state.labeled_chunks:
                         st.info(f"🧾 **Simple Explanation:**\n\n{explanation}")
 
                 # Civilian-friendly suggestions
-        if clause["risk"] in ["High", "Medium"]:
-            with st.expander("💬 What you could ask"):
-                if clause["type"] == "Termination":
-                            st.markdown("- Can we extend the notice period?")
-                            st.markdown("- Can termination only happen with cause?")
-                elif clause["type"] == "Payment":
-                            st.markdown("- Can we clarify late fees or payment schedule?")
-                elif clause["type"] == "Confidentiality":
-                    st.markdown("- Can we limit how long confidentiality lasts?")
-                elif clause["type"] == "Liability":
-                    st.markdown("- Can we cap the damages or limit responsibility?")
-                elif clause["type"] == "IP":
-                    st.markdown("- Can we clarify who owns the work created?")
-                elif clause["type"] == "Scope":
-                    st.markdown("- Can we define exactly what services are included?")
+            if clause["risk"] in ["High", "Medium"]:
+                with st.expander("💬 What you could ask"):
+                    if clause["type"] == "Termination":
+                                st.markdown("- Can we extend the notice period?")
+                                st.markdown("- Can termination only happen with cause?")
+                    elif clause["type"] == "Payment":
+                                st.markdown("- Can we clarify late fees or payment schedule?")
+                    elif clause["type"] == "Confidentiality":
+                        st.markdown("- Can we limit how long confidentiality lasts?")
+                    elif clause["type"] == "Liability":
+                        st.markdown("- Can we cap the damages or limit responsibility?")
+                    elif clause["type"] == "IP":
+                        st.markdown("- Can we clarify who owns the work created?")
+                    elif clause["type"] == "Scope":
+                        st.markdown("- Can we define exactly what services are included?")
 
-                
+                    
