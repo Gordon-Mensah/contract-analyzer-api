@@ -137,18 +137,21 @@ keyword_map = {
 
 risk_terms = {
     "High": [
-        "penalty", "exclusive", "binding", "indemnify", "irreversible",
-        "non-compete", "liquidated damages", "termination for cause", "unlimited liability", "injunction"
+        "indemnify", "exclusive", "binding", "liquidated damages", "termination for cause",
+        "unlimited liability", "injunction", "non-compete", "penalty", "breach of contract",
+        "hold harmless", "waiver of rights", "irrevocable", "enforceable", "non-solicitation"
     ],
     "Medium": [
-        "termination", "confidential", "governing law", "non-compete",
-        "auto-renewal", "assignment", "jurisdiction", "force majeure", "compliance"
+        "termination", "confidential", "governing law", "jurisdiction", "auto-renewal",
+        "assignment", "force majeure", "compliance", "third-party", "limited liability",
+        "notice period", "modification", "dispute resolution", "arbitration"
     ],
     "Low": [
-        "notice", "duration", "payment", "invoice",
-        "schedule", "timeline", "definitions", "headings", "entire agreement"
+        "payment", "invoice", "duration", "schedule", "definitions", "headings",
+        "entire agreement", "timeline", "services", "deliverables", "fee", "scope"
     ]
 }
+
 
 
 # ---------- Core Functions ----------
@@ -260,7 +263,15 @@ def detect_clause_type(text, contract_type, keyword_map):
 
 def detect_risk_level(text, risk_terms):
     text = text.lower()
+    scores = {"High": 0, "Medium": 0, "Low": 0}
     for level, keywords in risk_terms.items():
-        if any(kw in text for kw in keywords):
-            return level
-    return "Medium"
+        for kw in keywords:
+            if kw in text:
+                scores[level] += 1
+    # Return the level with the highest score
+    return max(scores, key=scores.get) if any(scores.values()) else "Medium"
+
+    if scores["High"] == scores["Medium"] == scores["Low"]:
+        if "Termination" in clause_type or "Liability" in clause_type:
+            return "High"
+        return "Medium"
