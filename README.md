@@ -1,7 +1,3 @@
-Absolutely, Gordon — here’s your updated and final `README.md` with the live app link included:
-
----
-
 # 📄 Contract Intelligence Platform
 
 **AI-powered clause analysis, risk detection, and negotiation support for smarter contracts.**  
