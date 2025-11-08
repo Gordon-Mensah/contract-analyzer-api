@@ -155,7 +155,7 @@ if st.session_state.negotiation_text and st.button("🔍 Analyze Clauses"):
                 "translated": ""
             })
 
-        if st.session_state.get("analysis_done"):
+        st.session_state.get("analysis_done"):
         st.session_state.analysis_done = True
         st.success(f"{len(labeled)} clauses analyzed.")
         st.write(f"⏱️ Clause analysis took {time.time() - start:.2f} seconds")
