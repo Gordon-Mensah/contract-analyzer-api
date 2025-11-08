@@ -11,3 +11,4 @@ diff-match-patch>=20200713
 pdfminer.six>=20221105
 deep-translator>=1.8.1
 Pillow>=9.0.0
+plotly-6.4.0
